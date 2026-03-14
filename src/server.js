@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import { infoCommand, installCommand, publishCommand, searchCommand } from "./index.js";
 import { publishUploadedBundle } from "./lib/bundle-transfer.js";
 import { notFound, readJsonBody, sendHtml, sendJson } from "./lib/http.js";
-import { renderAgentDetailPage, renderAgentListPage } from "./lib/html.js";
+import { renderAgentDetailPage, renderAgentListPage, renderStatsPage } from "./lib/html.js";
 import {
   initDatabase,
   incrementDownloads,
@@ -126,6 +126,15 @@ export async function createServer({ registryDir, port = 3000, host = "0.0.0.0" 
         // 添加下载数
         const downloads = await getAgentDownloads(registryDir, slug);
         sendHtml(response, 200, renderAgentDetailPage({ ...manifest, downloads }));
+        return;
+      }
+
+      // 统计页面
+      if (url.pathname === "/stats") {
+        const stats = await getDatabaseStats(registryDir);
+        const ranking = await getDownloadRanking(registryDir, 10);
+        const recent = await getRecentDownloads(registryDir, 20);
+        sendHtml(response, 200, renderStatsPage({ stats, ranking, recent }));
         return;
       }
 

@@ -2,7 +2,7 @@
 # AgentHub Discover Skill
 # 用于 AI Agent 调用的 AgentHub 发现技能
 
-REGISTRY_URL="${AGENTHUB_REGISTRY:-http://127.0.0.1:3456}"
+REGISTRY_URL="${AGENTHUB_REGISTRY:-https://www.agenthub.cyou}"
 
 case "$1" in
   list)

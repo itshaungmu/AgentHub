@@ -229,6 +229,7 @@ function page(title, body) {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>${title}</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦀</text></svg>">
   <style>
     /* Light theme (default) */
     :root {
@@ -324,6 +325,20 @@ function page(title, body) {
     }
     .nav-links a:hover {
       color: var(--accent);
+    }
+    .nav-powered {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .nav-powered a {
+      color: var(--accent);
+      font-weight: 600;
     }
 
     /* Language Switcher */
@@ -837,6 +852,62 @@ function page(title, body) {
       color: var(--text-primary);
     }
 
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+      margin-top: 60px;
+      background: var(--bg-secondary);
+    }
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .footer-brand-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    .footer-brand-text {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .footer-powered {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .footer-powered a {
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+    .footer-links a {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+    .footer-links a:hover {
+      color: var(--accent);
+    }
+
     @media (max-width: 768px) {
       .hero h1 { font-size: 32px; }
       .hero-stats { gap: 24px; flex-wrap: wrap; }
@@ -845,6 +916,7 @@ function page(title, body) {
       .nav-links { gap: 16px; }
       .detail-grid { grid-template-columns: 1fr; }
       .agent-grid { grid-template-columns: 1fr; }
+      .footer-content { flex-direction: column; text-align: center; }
     }
   </style>
 </head>
@@ -852,13 +924,18 @@ function page(title, body) {
   <header>
     <div class="container header-content">
       <a href="/" class="logo">
-        <div class="logo-icon">A</div>
+        <div class="logo-icon">🦀</div>
         <span>AgentHub</span>
       </a>
       <nav class="nav-links">
         <a href="/"><span data-i18n="navHome">Home</span></a>
         <a href="/stats"><span data-i18n="navStats">Stats</span></a>
         <a href="https://github.com/itshaungmu/AgentHub" target="_blank">GitHub</a>
+        <div class="nav-powered">
+          <span>🦀</span>
+          <span>Powered by</span>
+          <a href="https://github.com/openclaw" target="_blank">OpenClaw</a>
+        </div>
         <div class="lang-switcher">
           <button class="lang-btn active" data-lang="en" onclick="setLang('en')">EN</button>
           <button class="lang-btn" data-lang="zh" onclick="setLang('zh')">中文</button>
@@ -868,6 +945,24 @@ function page(title, body) {
     </div>
   </header>
   <main class="container">${body}</main>
+  <footer>
+    <div class="container footer-content">
+      <div class="footer-brand">
+        <div class="footer-brand-icon">🦀</div>
+        <span class="footer-brand-text">AgentHub</span>
+      </div>
+      <div class="footer-powered">
+        <span>Powered by</span>
+        <a href="https://github.com/openclaw" target="_blank">OpenClaw</a>
+        <span>•</span>
+        <span>Built with ❤️ for AI Agents</span>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/openclaw" target="_blank">OpenClaw</a>
+        <a href="https://github.com/itshaungmu/AgentHub" target="_blank">AgentHub</a>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>
 ${langScript}`;

@@ -139,6 +139,13 @@ npm test
 node src/cli.js serve --registry ./.registry
 ```
 
+## 🐳 Docker Deployment
+
+```bash
+# Production start (in container)
+NODE_ENV=production node src/cli.js serve --registry ./.registry --port 3000 --host 0.0.0.0
+```
+
 ## 🤝 Contributing
 
 We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.

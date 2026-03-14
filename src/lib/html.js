@@ -191,10 +191,33 @@ const langScript = `
     document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
   }
 
+  // Theme toggle function
+  function setTheme(theme) {
+    localStorage.setItem('agenthub-theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+    // Update theme button icon
+    const themeBtn = document.querySelector('.theme-btn');
+    if (themeBtn) {
+      themeBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+      themeBtn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+  }
+
+  function toggleTheme() {
+    const currentTheme = localStorage.getItem('agenthub-theme') || 'light';
+    setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+  }
+
   window.setLang = setLang;
+  window.toggleTheme = toggleTheme;
   window.i18n = ${JSON.stringify(i18n)};
 
-  document.addEventListener('DOMContentLoaded', () => setLang(savedLang));
+  document.addEventListener('DOMContentLoaded', () => {
+    setLang(savedLang);
+    // Initialize theme (default to light)
+    const savedTheme = localStorage.getItem('agenthub-theme') || 'light';
+    setTheme(savedTheme);
+  });
 })();
 </script>
 `;
@@ -207,22 +230,40 @@ function page(title, body) {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>${title}</title>
   <style>
+    /* Light theme (default) */
     :root {
-      --bg-primary: #0f0f0f;
-      --bg-secondary: #1a1a1a;
-      --bg-card: #242424;
-      --bg-card-hover: #2a2a2a;
-      --text-primary: #ffffff;
-      --text-secondary: #a0a0a0;
-      --text-muted: #6b6b6b;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f5f5f5;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f0f0f0;
+      --bg-code: #f0f0f0;
+      --text-primary: #1a1a1a;
+      --text-secondary: #555555;
+      --text-muted: #888888;
       --accent: #10b981;
-      --accent-light: #34d399;
-      --accent-dark: #059669;
-      --border: #333333;
+      --accent-light: #059669;
+      --accent-dark: #047857;
+      --border: #e0e0e0;
+      --header-bg: rgba(255, 255, 255, 0.95);
       --tag-ops: #8b5cf6;
       --tag-engineering: #3b82f6;
       --tag-content: #f59e0b;
       --tag-product: #ec4899;
+    }
+
+    /* Dark theme */
+    [data-theme="dark"] {
+      --bg-primary: #0f0f0f;
+      --bg-secondary: #1a1a1a;
+      --bg-card: #242424;
+      --bg-card-hover: #2a2a2a;
+      --bg-code: #1a1a1a;
+      --text-primary: #ffffff;
+      --text-secondary: #a0a0a0;
+      --text-muted: #6b6b6b;
+      --accent-light: #34d399;
+      --border: #333333;
+      --header-bg: rgba(15, 15, 15, 0.95);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -245,7 +286,7 @@ function page(title, body) {
       padding: 20px 0;
       position: sticky;
       top: 0;
-      background: rgba(15, 15, 15, 0.95);
+      background: var(--header-bg);
       backdrop-filter: blur(10px);
       z-index: 100;
     }
@@ -309,7 +350,27 @@ function page(title, body) {
     }
     .lang-btn.active {
       background: var(--accent);
-      color: var(--bg-primary);
+      color: #ffffff;
+    }
+
+    /* Theme Switcher */
+    .theme-btn {
+      background: var(--bg-secondary);
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      margin-left: 8px;
+    }
+    .theme-btn:hover {
+      background: var(--bg-card-hover);
+      transform: scale(1.1);
     }
 
     /* Hero */
@@ -481,7 +542,7 @@ function page(title, body) {
     }
     .agent-install {
       background: var(--accent);
-      color: var(--bg-primary);
+      color: #ffffff;
       padding: 8px 16px;
       border-radius: 8px;
       font-size: 13px;
@@ -489,7 +550,7 @@ function page(title, body) {
       transition: all 0.2s;
     }
     .agent-install:hover {
-      background: var(--accent-light);
+      background: var(--accent-dark);
     }
 
     /* API Box */
@@ -509,13 +570,13 @@ function page(title, body) {
       margin-bottom: 24px;
     }
     .api-code {
-      background: var(--bg-primary);
+      background: var(--bg-code);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 20px;
       font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
       font-size: 14px;
-      color: var(--accent-light);
+      color: var(--accent);
       overflow-x: auto;
     }
 
@@ -560,8 +621,9 @@ function page(title, body) {
       font-weight: 600;
     }
     .detail-install {
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
-      color: white;
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      color: var(--accent);
       padding: 16px 24px;
       border-radius: 12px;
       font-family: monospace;
@@ -572,7 +634,7 @@ function page(title, body) {
     }
     .detail-install::before {
       content: "$";
-      color: var(--accent-light);
+      color: var(--text-muted);
       font-weight: bold;
     }
 
@@ -708,7 +770,7 @@ function page(title, body) {
       width: 48px;
       height: 48px;
       background: var(--accent);
-      color: var(--bg-primary);
+      color: #ffffff;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -750,7 +812,7 @@ function page(title, body) {
     }
     .search-box button {
       background: var(--accent);
-      color: var(--bg-primary);
+      color: #ffffff;
       border: none;
       padding: 12px 24px;
       border-radius: 8px;
@@ -760,7 +822,7 @@ function page(title, body) {
       transition: all 0.2s;
     }
     .search-box button:hover {
-      background: var(--accent-light);
+      background: var(--accent-dark);
     }
 
     /* Empty state */
@@ -796,11 +858,12 @@ function page(title, body) {
       <nav class="nav-links">
         <a href="/"><span data-i18n="navHome">Home</span></a>
         <a href="/stats"><span data-i18n="navStats">Stats</span></a>
-        <a href="https://github.com/agenthub/agenthub" target="_blank">GitHub</a>
+        <a href="https://github.com/itshaungmu/AgentHub" target="_blank">GitHub</a>
         <div class="lang-switcher">
           <button class="lang-btn active" data-lang="en" onclick="setLang('en')">EN</button>
           <button class="lang-btn" data-lang="zh" onclick="setLang('zh')">中文</button>
         </div>
+        <button class="theme-btn" onclick="toggleTheme()" aria-label="Switch theme">🌙</button>
       </nav>
     </div>
   </header>

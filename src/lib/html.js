@@ -306,12 +306,12 @@ function page(title, body) {
     .logo-icon {
       width: 40px;
       height: 40px;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+      background: transparent;
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: 28px;
     }
     .nav-links {
       display: flex;
@@ -874,12 +874,10 @@ function page(title, body) {
     .footer-brand-icon {
       width: 32px;
       height: 32px;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
-      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
+      font-size: 22px;
     }
     .footer-brand-text {
       font-weight: 600;

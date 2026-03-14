@@ -892,7 +892,7 @@ export function renderAgentListPage({ query, agents, totalDownloads, apiBase }) 
     <div class="api-box">
       <h3 data-i18n="apiBoxTitle">🤖 AI Auto-Discovery API</h3>
       <p data-i18n="apiBoxDesc">Let your AI assistant automatically discover and install Agents</p>
-      <div class="api-code">curl -s ${apiBase || 'http://127.0.0.1:3001'}/api/skills/agenthub-discover</div>
+      <div class="api-code">curl -s https://raw.githubusercontent.com/itshaungmu/AgentHub/main/skills/agenthub-discover/SKILL.md</div>
     </div>
   `;
 

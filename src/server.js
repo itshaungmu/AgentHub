@@ -16,7 +16,7 @@ import {
   getDatabaseStats
 } from "./lib/database.js";
 
-export async function createServer({ registryDir, port = 3000 }) {
+export async function createServer({ registryDir, port = 3000, host = "0.0.0.0" }) {
   // 初始化数据库
   await initDatabase(registryDir);
 
@@ -135,14 +135,15 @@ export async function createServer({ registryDir, port = 3000 }) {
     }
   });
 
-  await new Promise((resolve) => server.listen(port, "127.0.0.1", resolve));
+  await new Promise((resolve) => server.listen(port, host, resolve));
   const address = server.address();
   const actualPort = typeof address === "object" && address ? address.port : port;
 
   return {
     server,
     port: actualPort,
-    baseUrl: `http://127.0.0.1:${actualPort}`,
+    host,
+    baseUrl: `http://${host === "0.0.0.0" ? "localhost" : host}:${actualPort}`,
     close: () => new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve()))),
   };
 }

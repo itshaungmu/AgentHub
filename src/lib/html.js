@@ -908,13 +908,98 @@ function page(title, body) {
 
     @media (max-width: 768px) {
       .hero h1 { font-size: 32px; }
+      .hero-subtitle { font-size: 16px; padding: 0 12px; }
       .hero-stats { gap: 24px; flex-wrap: wrap; }
       .features { grid-template-columns: 1fr; }
       .how-it-works { grid-template-columns: 1fr; }
-      .nav-links { gap: 16px; }
       .detail-grid { grid-template-columns: 1fr; }
       .agent-grid { grid-template-columns: 1fr; }
       .footer-content { flex-direction: column; text-align: center; }
+
+      /* Mobile navigation */
+      .header-content {
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .nav-links {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .nav-powered {
+        display: none;
+      }
+      .logo {
+        font-size: 20px;
+      }
+      .logo-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 22px;
+      }
+      .container {
+        padding: 0 16px;
+      }
+      .hero {
+        padding: 40px 16px 30px;
+      }
+      .detail-header {
+        padding: 24px;
+      }
+      .section-card {
+        padding: 20px;
+      }
+      .search-box {
+        margin: 0 0 24px;
+      }
+      .search-box input {
+        font-size: 14px;
+      }
+      .search-box button {
+        padding: 10px 16px;
+        font-size: 14px;
+      }
+      .api-box {
+        padding: 24px;
+      }
+      .api-code {
+        font-size: 12px;
+        padding: 16px;
+      }
+      .stats-table th, .stats-table td {
+        padding: 12px 8px;
+        font-size: 13px;
+      }
+      .step-number {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .lang-switcher {
+        display: none;
+      }
+      .theme-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+      }
+      .hero-stat-value {
+        font-size: 28px;
+      }
+      .hero-stat-label {
+        font-size: 12px;
+      }
+      .nav-links {
+        gap: 8px;
+      }
+      .nav-links a {
+        font-size: 14px;
+      }
     }
   </style>
 </head>

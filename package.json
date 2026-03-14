@@ -1,0 +1,41 @@
+{
+  "name": "agenthub",
+  "version": "0.1.0",
+  "description": "AI Agent 打包与分发平台 - 一句话打包上传，一键下载获得能力",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "agenthub": "src/cli.js"
+  },
+  "files": [
+    "src/"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "start": "node src/cli.js serve --registry .registry --port 3000"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "openclaw",
+    "package-manager",
+    "registry",
+    "cli"
+  ],
+  "author": "AgentHub Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/agenthub/agenthub.git"
+  },
+  "bugs": {
+    "url": "https://github.com/agenthub/agenthub/issues"
+  },
+  "homepage": "https://github.com/agenthub/agenthub#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "sql.js": "^1.14.1"
+  }
+}

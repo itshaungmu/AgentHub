@@ -31,6 +31,8 @@ export async function publishBundle(bundleDir, registryDir) {
     description: manifest.description,
     runtime: manifest.runtime,
     updatedAt: new Date().toISOString(),
+    tags: manifest.metadata?.tags || [],
+    category: manifest.metadata?.category || 'General',
   });
   index.agents.sort((left, right) => left.slug.localeCompare(right.slug));
   await writeJson(indexPath, index);
@@ -44,8 +46,26 @@ export async function searchRegistry(registryDir, query) {
     return [];
   }
   const index = await readJson(indexPath);
-  const normalized = query.toLowerCase();
-  return index.agents.filter((entry) => entry.slug.toLowerCase().includes(normalized));
+  const normalized = query.toLowerCase().trim();
+
+  // 空查询返回所有
+  if (!normalized) {
+    return index.agents;
+  }
+
+  return index.agents.filter((entry) => {
+    // 搜索 slug
+    if (entry.slug?.toLowerCase().includes(normalized)) return true;
+    // 搜索 name
+    if (entry.name?.toLowerCase().includes(normalized)) return true;
+    // 搜索 description
+    if (entry.description?.toLowerCase().includes(normalized)) return true;
+    // 搜索 tags
+    if (entry.tags?.some(tag => tag.toLowerCase().includes(normalized))) return true;
+    // 搜索 category
+    if (entry.category?.toLowerCase().includes(normalized)) return true;
+    return false;
+  });
 }
 
 export async function readAgentInfo(registryDir, agentSpec) {

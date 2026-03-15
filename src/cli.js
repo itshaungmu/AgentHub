@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * AgentHub CLI
  * AI Agent 打包与分发平台
@@ -95,16 +96,18 @@ agenthub publish - 发布 Agent
 agenthub install - 安装 Agent
 
 用法:
-  agenthub install <agent-slug>[:version] --registry <dir> --target-workspace <dir>
+  agenthub install <agent-slug>[:version] [--registry <dir> | --server <url>] --target-workspace <dir>
 
 选项:
-  --registry <dir>          Registry 目录 (必需)
+  --registry <dir>          本地 Registry 目录（与 --server 二选一）
+  --server <url>            远程服务器地址（默认: https://agenthub.cyou）
   --target-workspace <dir>  目标工作区目录 (必需)
   --force                   强制覆盖
 
 示例:
   agenthub install code-review-assistant --registry ./.registry --target-workspace ./workspace
-  agenthub install my-agent:1.0.0 --registry ./.registry --target-workspace ./workspace
+  agenthub install my-agent:1.0.0 --server https://agenthub.cyou --target-workspace ./workspace
+  agenthub install meeting-minutes-assistant --target-workspace ./workspace
 `,
     search: `
 agenthub search - 搜索 Agent

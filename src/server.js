@@ -2,7 +2,7 @@ import http from "node:http";
 import path from "node:path";
 import { readFile } from "node:fs/promises";
 import { infoCommand, installCommand, publishCommand, searchCommand } from "./index.js";
-import { publishUploadedBundle } from "./lib/bundle-transfer.js";
+import { publishUploadedBundle, serializeBundleDir } from "./lib/bundle-transfer.js";
 import { notFound, readJsonBody, sendHtml, sendJson } from "./lib/http.js";
 import { renderAgentDetailPage, renderAgentListPage, renderStatsPage } from "./lib/html.js";
 import {
@@ -106,6 +106,16 @@ export async function createServer({ registryDir, port = 3000, host = "0.0.0.0" 
         const limit = parseInt(url.searchParams.get("limit") || "10", 10);
         const ranking = await getDownloadRanking(registryDir, limit);
         sendJson(response, 200, { ranking });
+        return;
+      }
+
+      if (url.pathname.startsWith("/api/agents/") && url.pathname.endsWith("/download")) {
+        const slug = url.pathname.slice("/api/agents/".length, -"/download".length);
+        const version = url.searchParams.get("version") || undefined;
+        const manifest = await infoCommand(version ? `${slug}:${version}` : slug, { registry: registryDir });
+        const bundleDir = path.join(registryDir, "agents", manifest.slug, manifest.version);
+        const payload = await serializeBundleDir(bundleDir);
+        sendJson(response, 200, payload);
         return;
       }
 

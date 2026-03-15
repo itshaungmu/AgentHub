@@ -2,7 +2,7 @@ import http from "node:http";
 import path from "node:path";
 import { readFile } from "node:fs/promises";
 import { infoCommand, installCommand, publishCommand, searchCommand } from "./index.js";
-import { publishUploadedBundle } from "./lib/bundle-transfer.js";
+import { publishUploadedBundle, serializeBundleDir } from "./lib/bundle-transfer.js";
 import { notFound, readJsonBody, sendJson } from "./lib/http.js";
 import {
   initDatabase,
@@ -103,6 +103,22 @@ export async function createApiServer({ registryDir, port = 3000 }) {
         const downloads = await getAgentsDownloads(registryDir, slugs);
         const agentsWithDownloads = agents.map(a => ({ ...a, downloads: downloads[a.slug] || 0 }));
         sendJson(response, 200, { agents: agentsWithDownloads }, corsHeaders);
+        return;
+      }
+
+      // API: 下载 Agent Bundle（远程安装）
+      if (url.pathname.startsWith("/api/agents/") && url.pathname.endsWith("/download")) {
+        const slug = url.pathname.slice("/api/agents/".length, -"/download".length);
+        if (!isValidSlug(slug)) {
+          sendJson(response, 400, { error: "Invalid slug format" }, corsHeaders);
+          return;
+        }
+
+        const version = url.searchParams.get("version") || undefined;
+        const manifest = await infoCommand(version ? `${slug}:${version}` : slug, { registry: registryDir });
+        const bundleDir = path.join(registryDir, "agents", manifest.slug, manifest.version);
+        const payload = await serializeBundleDir(bundleDir);
+        sendJson(response, 200, payload, corsHeaders);
         return;
       }
 

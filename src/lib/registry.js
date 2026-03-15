@@ -30,6 +30,7 @@ export async function publishBundle(bundleDir, registryDir) {
     name: manifest.name,
     description: manifest.description,
     runtime: manifest.runtime,
+    updatedAt: new Date().toISOString(),
   });
   index.agents.sort((left, right) => left.slug.localeCompare(right.slug));
   await writeJson(indexPath, index);

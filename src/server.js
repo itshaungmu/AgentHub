@@ -47,6 +47,16 @@ export async function createServer({ registryDir, port = 3000, host = "0.0.0.0" 
         const slugs = agents.map(a => a.slug);
         const downloads = await getAgentsDownloads(registryDir, slugs);
         const agentsWithDownloads = agents.map(a => ({ ...a, downloads: downloads[a.slug] || 0 }));
+        // 按下载量降序排序，下载量一致时按更新时间降序排序
+        agentsWithDownloads.sort((a, b) => {
+          if (b.downloads !== a.downloads) {
+            return b.downloads - a.downloads;
+          }
+          // 下载量一致时，按更新时间降序（最近更新的排前面）
+          const timeA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+          const timeB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+          return timeB - timeA;
+        });
         sendJson(response, 200, { agents: agentsWithDownloads });
         return;
       }
@@ -116,6 +126,16 @@ export async function createServer({ registryDir, port = 3000, host = "0.0.0.0" 
         const downloads = await getAgentsDownloads(registryDir, slugs);
         const totalDownloads = await getTotalDownloads(registryDir);
         const agentsWithDownloads = agents.map(a => ({ ...a, downloads: downloads[a.slug] || 0 }));
+        // 按下载量降序排序，下载量一致时按更新时间降序排序
+        agentsWithDownloads.sort((a, b) => {
+          if (b.downloads !== a.downloads) {
+            return b.downloads - a.downloads;
+          }
+          // 下载量一致时，按更新时间降序（最近更新的排前面）
+          const timeA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+          const timeB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+          return timeB - timeA;
+        });
         sendHtml(response, 200, renderAgentListPage({ query, agents: agentsWithDownloads, totalDownloads }));
         return;
       }

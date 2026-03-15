@@ -1,0 +1,30 @@
+# Development files
+.git/
+.gitignore
+.node_modules/
+
+# Registry data
+.registry/
+
+# Build outputs
+bundles/
+.tmp-model-refresh/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Test files
+test/
+*.test.js
+
+# Documentation (keep README)
+docs/
+*.md
+!README.md
+
+# Misc
+.DS_Store
+*.log
+.env*

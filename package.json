@@ -1,5 +1,5 @@
 {
-  "name": "agenthub",
+  "name": "@zshuangmu/agenthub",
   "version": "0.1.0",
   "description": "AI Agent 打包与分发平台 - 一句话打包上传，一键下载获得能力",
   "type": "module",
@@ -26,12 +26,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/agenthub/agenthub.git"
+    "url": "https://github.com/itshaungmu/AgentHub.git"
   },
   "bugs": {
-    "url": "https://github.com/agenthub/agenthub/issues"
+    "url": "https://github.com/itshaungmu/AgentHub/issues"
   },
-  "homepage": "https://github.com/agenthub/agenthub#readme",
+  "homepage": "https://github.com/itshaungmu/AgentHub#readme",
   "engines": {
     "node": ">=18.0.0"
   },

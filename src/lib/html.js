@@ -217,6 +217,29 @@ const langScript = `
     // Initialize theme (default to light)
     const savedTheme = localStorage.getItem('agenthub-theme') || 'light';
     setTheme(savedTheme);
+
+    // Initialize copy buttons
+    document.querySelectorAll('.api-code, .detail-install').forEach(el => {
+      el.addEventListener('click', async (e) => {
+        const codeText = el.querySelector('.code-text');
+        const text = codeText ? codeText.textContent.trim() : el.textContent.trim();
+        const btn = el.querySelector('.copy-btn');
+
+        try {
+          await navigator.clipboard.writeText(text);
+          if (btn) {
+            btn.textContent = '✓';
+            btn.classList.add('copied');
+            setTimeout(() => {
+              btn.textContent = '📋';
+              btn.classList.remove('copied');
+            }, 2000);
+          }
+        } catch (err) {
+          console.error('Copy failed:', err);
+        }
+      });
+    });
   });
 })();
 </script>
@@ -783,11 +806,48 @@ function page(title, body, options = {}) {
       color: var(--accent);
       overflow-x: auto;
       position: relative;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      transition: border-color 0.2s, background 0.2s;
     }
-    .api-code::before {
+    .api-code:hover {
+      border-color: var(--accent);
+      background: var(--bg-secondary);
+    }
+    .api-code .code-text {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .api-code .code-text::before {
       content: '$';
-      margin-right: 10px;
       color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .api-code .copy-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .api-code .copy-btn:hover {
+      background: var(--accent);
+      color: var(--bg-primary);
+      border-color: var(--accent);
+    }
+    .api-code .copy-btn.copied {
+      background: #22c55e;
+      border-color: #22c55e;
+      color: white;
     }
 
     /* Detail Page */
@@ -858,11 +918,74 @@ function page(title, body, options = {}) {
       display: flex;
       align-items: center;
       gap: 10px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
     }
-    .detail-install::before {
+    .detail-install:hover {
+      border-color: var(--accent);
+      background: var(--bg-secondary);
+    }
+    .detail-install .code-text {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .detail-install .code-text::before {
       content: "$";
       color: var(--text-muted);
       font-weight: bold;
+    }
+    .detail-install .copy-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .detail-install .copy-btn:hover {
+      background: var(--accent);
+      color: var(--bg-primary);
+      border-color: var(--accent);
+    }
+    .detail-install .copy-btn.copied {
+      background: #22c55e;
+      border-color: #22c55e;
+      color: white;
+    }
+    .install-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .install-methods {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .install-box {
+      position: relative;
+    }
+    .install-box.primary .detail-install {
+      border-color: var(--accent);
+      background: linear-gradient(135deg, rgba(var(--accent-rgb, 99, 102, 241), 0.1), transparent);
+    }
+    .install-box .badge-new {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: var(--accent);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 500;
     }
 
     .section-card {
@@ -1329,7 +1452,10 @@ export function renderAgentListPage({ query, agents, totalDownloads, apiBase }) 
     <div class="api-box">
       <h3 data-i18n="apiBoxTitle">🤖 AI Auto-Discovery API</h3>
       <p data-i18n="apiBoxDesc">Let your AI assistant automatically discover and install Agents</p>
-      <div class="api-code">curl -s https://raw.githubusercontent.com/itshaungmu/AgentHub/main/skills/agenthub-discover/SKILL.md</div>
+      <div class="api-code" title="Click to copy">
+        <span class="code-text">curl -s https://raw.githubusercontent.com/itshaungmu/AgentHub/main/skills/agenthub-discover/SKILL.md</span>
+        <button class="copy-btn" title="Copy">📋</button>
+      </div>
     </div>
   `;
 
@@ -1443,7 +1569,10 @@ export function renderAgentDetailPage(manifest) {
           <div class="detail-value">${manifest.author || 'Anonymous'}</div>
         </div>
       </div>
-      <div class="detail-install">agenthub install ${manifest.slug}</div>
+      <div class="detail-install" title="Click to copy">
+        <span class="code-text">npx @zshuangmu/agenthub install ${manifest.slug}</span>
+        <button class="copy-btn" title="Copy">📋</button>
+      </div>
     </div>
 
     ${persona.summary ? `
@@ -1489,7 +1618,23 @@ export function renderAgentDetailPage(manifest) {
     <div class="section-card">
       <h3 data-i18n="installMethodTitle">📥 Installation</h3>
       <p style="color: var(--text-secondary); margin-bottom: 16px;" data-i18n="installMethodDesc">Run in your workspace:</p>
-      <div class="detail-install">agenthub install ${manifest.slug}@${manifest.version} --target-workspace ./my-workspace</div>
+      <div class="install-methods">
+        <div class="install-box primary">
+          <span class="badge-new">推荐</span>
+          <div class="install-label">npx (无需预安装)</div>
+          <div class="detail-install" title="Click to copy">
+            <span class="code-text">npx @zshuangmu/agenthub install ${manifest.slug} --target-workspace ./my-workspace</span>
+            <button class="copy-btn" title="Copy">📋</button>
+          </div>
+        </div>
+        <div class="install-box">
+          <div class="install-label">已有 CLI</div>
+          <div class="detail-install" title="Click to copy">
+            <span class="code-text">agenthub install ${manifest.slug}@${manifest.version} --target-workspace ./my-workspace</span>
+            <button class="copy-btn" title="Copy">📋</button>
+          </div>
+        </div>
+      </div>
     </div>
     `,
     {

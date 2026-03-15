@@ -222,13 +222,60 @@ const langScript = `
 </script>
 `;
 
-function page(title, body) {
+function page(title, body, options = {}) {
+  const {
+    description = "AgentHub - The Open Source Marketplace for AI Agents. Package and upload your Agent's full capabilities in one command, download and gain those powers with one click.",
+    url = "https://agenthub.cyou/",
+    type = "website",
+    image = "https://agenthub.cyou/og-image.png"
+  } = options;
+
   return `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>${title}</title>
+
+  <!-- SEO Meta -->
+  <meta name="description" content="${description}">
+  <meta name="keywords" content="AI Agent, AgentHub, OpenClaw, AI marketplace, agent packaging, artificial intelligence, open source">
+  <meta name="author" content="AgentHub Team">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="${url}">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="${type}">
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${description}">
+  <meta property="og:url" content="${url}">
+  <meta property="og:image" content="${image}">
+  <meta property="og:site_name" content="AgentHub">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="zh_CN">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:description" content="${description}">
+  <meta name="twitter:image" content="${image}">
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "AgentHub",
+    "url": "https://agenthub.cyou/",
+    "description": "${description.replace(/"/g, '\\"')}",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://agenthub.cyou/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦀</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1327,7 +1374,11 @@ export function renderAgentListPage({ query, agents, totalDownloads, apiBase }) 
     </section>
 
     ${howItWorks}
-    `
+    `,
+    {
+      description: "AgentHub - The Open Source Marketplace for AI Agents. Package and upload your Agent's full capabilities in one command, download and gain those powers with one click.",
+      url: "https://agenthub.cyou/"
+    }
   );
 }
 
@@ -1441,7 +1492,12 @@ export function renderAgentDetailPage(manifest) {
       <p style="color: var(--text-secondary); margin-bottom: 16px;" data-i18n="installMethodDesc">Run in your workspace:</p>
       <div class="detail-install">agenthub install ${manifest.slug}@${manifest.version} --target-workspace ./my-workspace</div>
     </div>
-    `
+    `,
+    {
+      description: manifest.description || `${manifest.name || manifest.slug} - AI Agent on AgentHub. ${manifest.persona?.summary || ''}`.slice(0, 160),
+      url: `https://agenthub.cyou/agents/${manifest.slug}`,
+      type: "article"
+    }
   );
 }
 
@@ -1521,6 +1577,10 @@ export function renderStatsPage(statsData) {
         </tbody>
       </table>
     </div>
-    `
+    `,
+    {
+      description: "AgentHub Statistics Center - View download rankings, recent activity, and platform analytics for AI Agents.",
+      url: "https://agenthub.cyou/stats"
+    }
   );
 }

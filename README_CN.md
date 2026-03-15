@@ -42,7 +42,7 @@ AgentHub 是一个开源的 AI Agent 打包与分发平台。它可以让你：
 
 ## 📸 截图
 
-![alt text](image-cn.png)
+![alt text](./docs/image-cn.png)
 
 ## 🚀 快速开始
 

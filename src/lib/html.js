@@ -1188,7 +1188,6 @@ function page(title, body, options = {}) {
     }
 
     @media (max-width: 480px) {
-      .lang-switcher { display: none; }
       .theme-btn { width: 30px; height: 30px; font-size: 14px; }
       .hero-stat-value { font-size: 22px; }
       .hero-stat-label { font-size: 10px; }

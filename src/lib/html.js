@@ -218,26 +218,30 @@ const langScript = `
     const savedTheme = localStorage.getItem('agenthub-theme') || 'light';
     setTheme(savedTheme);
 
+    // Copy to clipboard with fallback
+    async function copyText(text) {
+      if (navigator.clipboard?.writeText) {
+        return navigator.clipboard.writeText(text);
+      }
+      const ta = Object.assign(document.createElement('textarea'), { value: text, style: 'position:fixed;opacity:0' });
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+
     // Initialize copy buttons
     document.querySelectorAll('.api-code, .detail-install').forEach(el => {
-      el.addEventListener('click', async (e) => {
-        const codeText = el.querySelector('.code-text');
-        const text = codeText ? codeText.textContent.trim() : el.textContent.trim();
+      el.addEventListener('click', () => {
+        const text = el.querySelector('.code-text')?.textContent.trim() || el.textContent.trim();
         const btn = el.querySelector('.copy-btn');
 
-        try {
-          await navigator.clipboard.writeText(text);
-          if (btn) {
-            btn.textContent = '✓';
-            btn.classList.add('copied');
-            setTimeout(() => {
-              btn.textContent = '📋';
-              btn.classList.remove('copied');
-            }, 2000);
-          }
-        } catch (err) {
-          console.error('Copy failed:', err);
-        }
+        copyText(text).then(() => {
+          if (!btn) return;
+          btn.textContent = '✓';
+          btn.classList.add('copied');
+          setTimeout(() => { btn.textContent = '📋'; btn.classList.remove('copied'); }, 1500);
+        }).catch(e => console.error('Copy failed:', e));
       });
     });
   });

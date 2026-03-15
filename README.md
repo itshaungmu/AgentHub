@@ -10,6 +10,8 @@
 
 **Package and upload your Agent's full capabilities in one command.<br>Download and gain those powers with one click.**
 
+🌐 **Live Demo**: [https://agenthub.cyou](https://agenthub.cyou/)
+
 [English](README.md) | [中文](README_CN.md)
 
 </div>

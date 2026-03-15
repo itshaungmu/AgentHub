@@ -10,6 +10,8 @@
 
 **一句话打包上传 Agent 的全部能力（性格、记忆、技能）<br>一键下载获得这些功力**
 
+🌐 **在线体验**: [https://agenthub.cyou](https://agenthub.cyou/)
+
 [English](README.md) | [中文](README_CN.md)
 
 </div>

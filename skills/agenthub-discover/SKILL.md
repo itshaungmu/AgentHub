@@ -16,13 +16,13 @@
 
 ```bash
 # 列出所有 Agent
-curl -s https://www.agenthub.cyou/api/agents | jq '.agents[] | {slug, name, version, description}'
+curl -s https://agenthub.cyou/api/agents | jq '.agents[] | {slug, name, version, description}'
 
 # 搜索 Agent
-curl -s "https://www.agenthub.cyou/api/agents?q=关键词" | jq '.agents[]'
+curl -s "https://agenthub.cyou/api/agents?q=关键词" | jq '.agents[]'
 
 # 获取 Agent 详情
-curl -s https://www.agenthub.cyou/api/agents/<slug> | jq .
+curl -s https://agenthub.cyou/api/agents/<slug> | jq .
 ```
 
 ### 2. 安装 Agent
@@ -60,24 +60,24 @@ agenthub publish ./bundles/<name>-1.0.0.agent --registry ./.registry
 ### 用户问：有什么好用的 Agent？
 
 ```bash
-curl -s https://www.agenthub.cyou/api/agents | jq -r '.agents[] | "- **\(.name)** (\(.slug)): \(.description)"'
+curl -s https://agenthub.cyou/api/agents | jq -r '.agents[] | "- **\(.name)** (\(.slug)): \(.description)"'
 ```
 
 ### 用户问：如何安装龙虾 Agent？
 
 ```bash
-curl -s https://www.agenthub.cyou/api/agents/lobster-agent | jq -r '"agenthub install " + .slug + " --registry ./.registry --target-workspace <workspace>"'
+curl -s https://agenthub.cyou/api/agents/lobster-agent | jq -r '"agenthub install " + .slug + " --registry ./.registry --target-workspace <workspace>"'
 ```
 
 ### 用户问：龙虾 Agent 有什么技能？
 
 ```bash
-curl -s https://www.agenthub.cyou/api/agents/lobster-agent | jq '.includes.skills'
+curl -s https://agenthub.cyou/api/agents/lobster-agent | jq '.includes.skills'
 ```
 
 ## Registry 地址
 
-- 本地开发：`https://www.agenthub.cyou`
+- 本地开发：`https://agenthub.cyou`
 - 私有部署：`http://your-server:3000`
 - 公网服务：`https://agenthub.io`（未来）
 

@@ -7,37 +7,37 @@
 ### 列出所有 Agent
 
 ```bash
-curl -s https://www.agenthub.cyou/api/agents | jq '.agents[] | {slug, name, version, description}'
+curl -s https://agenthub.cyou/api/agents | jq '.agents[] | {slug, name, version, description}'
 ```
 
 ### 搜索 Agent
 
 ```bash
-curl -s "https://www.agenthub.cyou/api/agents?q=<关键词>" | jq '.agents[] | {slug, name, description}'
+curl -s "https://agenthub.cyou/api/agents?q=<关键词>" | jq '.agents[] | {slug, name, description}'
 ```
 
 ### 获取 Agent 详情
 
 ```bash
-curl -s https://www.agenthub.cyou/api/agents/<slug> | jq .
+curl -s https://agenthub.cyou/api/agents/<slug> | jq .
 ```
 
 ### 获取 Agent 技能
 
 ```bash
-curl -s https://www.agenthub.cyou/api/agents/<slug> | jq '.includes.skills'
+curl -s https://agenthub.cyou/api/agents/<slug> | jq '.includes.skills'
 ```
 
 ### 获取 Agent 记忆统计
 
 ```bash
-curl -s https://www.agenthub.cyou/api/agents/<slug> | jq '.includes.memory'
+curl -s https://agenthub.cyou/api/agents/<slug> | jq '.includes.memory'
 ```
 
 ### 生成安装命令
 
 ```bash
-curl -s https://www.agenthub.cyou/api/agents/<slug> | jq -r '"agenthub install " + .slug + " --registry ./.registry --target-workspace <workspace>"'
+curl -s https://agenthub.cyou/api/agents/<slug> | jq -r '"agenthub install " + .slug + " --registry ./.registry --target-workspace <workspace>"'
 ```
 
 ## 示例对话
@@ -46,7 +46,7 @@ curl -s https://www.agenthub.cyou/api/agents/<slug> | jq -r '"agenthub install "
 
 **AI 执行**:
 ```bash
-curl -s https://www.agenthub.cyou/api/agents | jq -r '.agents[] | "- **\(.name)** (\(.slug)): \(.description)"'
+curl -s https://agenthub.cyou/api/agents | jq -r '.agents[] | "- **\(.name)** (\(.slug)): \(.description)"'
 ```
 
 **AI 回复**:
@@ -59,7 +59,7 @@ curl -s https://www.agenthub.cyou/api/agents | jq -r '.agents[] | "- **\(.name)*
 
 **AI 执行**:
 ```bash
-curl -s https://www.agenthub.cyou/api/agents/lobster-agent | jq '.includes'
+curl -s https://agenthub.cyou/api/agents/lobster-agent | jq '.includes'
 ```
 
 **AI 回复**:
@@ -73,7 +73,7 @@ curl -s https://www.agenthub.cyou/api/agents/lobster-agent | jq '.includes'
 
 **AI 执行**:
 ```bash
-curl -s https://www.agenthub.cyou/api/agents/lobster-agent | jq -r '"agenthub install " + .slug + " --registry ./.registry --target-workspace <workspace>"'
+curl -s https://agenthub.cyou/api/agents/lobster-agent | jq -r '"agenthub install " + .slug + " --registry ./.registry --target-workspace <workspace>"'
 ```
 
 **AI 回复**:

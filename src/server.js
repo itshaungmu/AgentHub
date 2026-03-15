@@ -152,7 +152,7 @@ export async function createServer({ registryDir, port = 3000, host = "0.0.0.0" 
     server,
     port: actualPort,
     host,
-    baseUrl: `http://${host === "0.0.0.0" ? "localhost" : host}:${actualPort}`,
+    baseUrl: `http://${host === "0.0.0.0" ? "127.0.0.1" : host}:${actualPort}`,
     close: () => new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve()))),
   };
 }

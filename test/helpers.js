@@ -1,7 +1,12 @@
 import { mkdtemp, mkdir, writeFile, readFile, readdir, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+export const PROJECT_ROOT = path.resolve(__dirname, "..");
 
 export async function createTempDir(prefix = "agenthub-") {
   return mkdtemp(path.join(tmpdir(), prefix));
@@ -28,7 +33,7 @@ export async function setupWorkspace(root) {
 
 export function runCli(args, options = {}) {
   return spawnSync("node", ["src/cli.js", ...args], {
-    cwd: "/root/agenthub",
+    cwd: PROJECT_ROOT,
     encoding: "utf8",
     ...options,
   });

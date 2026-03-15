@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
 import { spawn } from "node:child_process";
-import { createTempDir, runCli, setupWorkspace, writeJson } from "./helpers.js";
+import { createTempDir, PROJECT_ROOT, runCli, setupWorkspace, writeJson } from "./helpers.js";
 
 function waitForExit(child) {
   return new Promise((resolve, reject) => {
@@ -43,7 +43,7 @@ test("serve command starts the browse server and returns usable pages", async ()
   );
 
   const child = spawn("node", ["src/cli.js", "serve", "--registry", registry, "--port", "0"], {
-    cwd: "/root/agenthub",
+    cwd: PROJECT_ROOT,
     stdio: ["ignore", "pipe", "pipe"],
     encoding: "utf8",
   });
@@ -107,7 +107,7 @@ test("publish-remote uploads a bundle to a running HTTP registry", async () => {
         "--server",
         server.baseUrl,
       ],
-      { cwd: "/root/agenthub", stdio: ["ignore", "pipe", "pipe"] },
+      { cwd: PROJECT_ROOT, stdio: ["ignore", "pipe", "pipe"] },
     );
     await waitForExit(child);
 

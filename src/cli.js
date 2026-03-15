@@ -176,7 +176,7 @@ async function main() {
     return;
   }
 
-  if (!command || options.help) {
+  if (!command) {
     printHelp();
     return;
   }

@@ -115,6 +115,11 @@ export async function createServer({ registryDir, port = 3000, host = "0.0.0.0" 
         const manifest = await infoCommand(version ? `${slug}:${version}` : slug, { registry: registryDir });
         const bundleDir = path.join(registryDir, "agents", manifest.slug, manifest.version);
         const payload = await serializeBundleDir(bundleDir);
+        // 记录下载（包含元数据）
+        await incrementDownloads(registryDir, manifest.slug, {
+          ip: request.socket.remoteAddress,
+          userAgent: request.headers['user-agent']
+        });
         sendJson(response, 200, payload);
         return;
       }

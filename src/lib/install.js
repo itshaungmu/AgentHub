@@ -5,53 +5,68 @@ import { materializeBundlePayload } from "./bundle-transfer.js";
 import { request as httpsRequest } from "node:https";
 import { request as httpRequest } from "node:http";
 
+function debugLog(message, details) {
+  if (!process.env.AGENTHUB_DEBUG_INSTALL) return;
+  const suffix = details ? ` | ${JSON.stringify(details)}` : "";
+  console.error(`[agenthub:install] ${message}${suffix}`);
+}
+
 async function requestPayloadText(rawUrl) {
   const parsed = new URL(rawUrl);
   const transport = parsed.protocol === "http:" ? httpRequest : httpsRequest;
+  const requestOptions = {
+    method: "GET",
+    hostname: parsed.hostname,
+    port: parsed.port,
+    path: `${parsed.pathname}${parsed.search || ""}`,
+    protocol: parsed.protocol,
+    headers: {
+      "User-Agent": "agenthub-cli/0.1.3",
+      Accept: "application/json",
+    },
+  };
+
+  debugLog("fallback request begin", { url: rawUrl, protocol: parsed.protocol, hostname: parsed.hostname, path: requestOptions.path });
 
   return await new Promise((resolve, reject) => {
-    const req = transport(
-      {
-        method: "GET",
-        hostname: parsed.hostname,
-        port: parsed.port,
-        path: `${parsed.pathname}${parsed.search || ""}`,
-        protocol: parsed.protocol,
-        headers: {
-          "User-Agent": "agenthub-cli/0.1.2",
-          Accept: "application/json",
-        },
-      },
-      (res) => {
-        let data = "";
-        res.on("data", (chunk) => {
-          data += chunk;
-        });
-        res.on("end", () => {
-          if (res.statusCode < 200 || res.statusCode >= 300) {
-            reject(new Error(`Remote install failed: ${res.statusCode} ${res.statusMessage || ""}`));
-            return;
-          }
-          resolve(data);
-        });
-      },
-    );
+    const req = transport(requestOptions, (res) => {
+      let data = "";
+      res.on("data", (chunk) => {
+        data += chunk;
+      });
+      res.on("end", () => {
+        if (res.statusCode < 200 || res.statusCode >= 300) {
+          const reason = `${res.statusCode} ${res.statusMessage || ""}`;
+          debugLog("fallback request failed", { reason, rawUrl });
+          reject(new Error(`Remote install failed: ${reason}`));
+          return;
+        }
+        debugLog("fallback request success", { rawUrl, bytes: data.length });
+        resolve(data);
+      });
+    });
 
-    req.on("error", (error) => reject(error));
+    req.on("error", (error) => {
+      debugLog("fallback request error", { rawUrl, message: error.message });
+      reject(error);
+    });
     req.end();
   });
 }
 
 async function fetchPayload(url) {
   const baseUrl = url.toString();
+  debugLog("requesting payload", { url: baseUrl });
 
   try {
     const response = await fetch(baseUrl);
+    debugLog("primary fetch done", { url: baseUrl, ok: response.ok, status: response.status, statusText: response.statusText });
     if (!response.ok) {
       throw new Error(`${response.status} ${response.statusText}`);
     }
     return response;
   } catch (err) {
+    debugLog("primary fetch failed, fallback to http/https", { url: baseUrl, error: err.message });
     const payloadText = await requestPayloadText(baseUrl);
     return {
       ok: true,
@@ -98,10 +113,13 @@ async function installFromRemote({ serverUrl, agentSpec, targetWorkspace }) {
     url.searchParams.set("version", version);
   }
 
+  debugLog("installing from remote", { serverUrl, slug, version: version || "latest", targetWorkspace, url: url.toString() });
+
   let response;
   try {
     response = await fetchPayload(url);
   } catch (error) {
+    debugLog("remote install failed", { slug, error: error.message });
     throw new Error(`Remote install failed: ${error.message}`);
   }
 
@@ -110,6 +128,7 @@ async function installFromRemote({ serverUrl, agentSpec, targetWorkspace }) {
   }
 
   const payload = await response.json();
+  debugLog("payload received", { slug, size: JSON.stringify(payload).length });
   const bundleDir = await materializeBundlePayload(payload);
   return applyBundleDir({ bundleDir, targetWorkspace });
 }

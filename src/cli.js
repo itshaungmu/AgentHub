@@ -26,7 +26,7 @@ import {
   formatVersionsOutput,
 } from "./index.js";
 
-const VERSION = "0.1.2";
+const VERSION = "0.1.3";
 
 function printHelp() {
   console.log(`

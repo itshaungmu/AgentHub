@@ -11,6 +11,19 @@ export async function installCommand(agentSpec, options) {
     options.server = "https://agenthub.cyou";
   }
 
+  const debugEnabled = Boolean(process.env.AGENTHUB_DEBUG_INSTALL);
+  const debug = (message, details) => {
+    if (!debugEnabled) return;
+    console.error(`[agenthub:install] ${message} | ${JSON.stringify(details)}`);
+  };
+
+  debug("start install", {
+    agentSpec,
+    hasRegistry: Boolean(options.registry),
+    hasServer: Boolean(options.server),
+    targetWorkspace,
+  });
+
   let result;
   if (options.registry) {
     result = await installBundle({
@@ -25,6 +38,12 @@ export async function installCommand(agentSpec, options) {
       targetWorkspace,
     });
   }
+
+  debug("install finished", {
+    slug: result.manifest.slug,
+    version: result.manifest.version,
+    installedAt: new Date().toISOString(),
+  });
 
   const installRecordPath = path.join(targetWorkspace, ".agenthub", "install.json");
   await writeJson(installRecordPath, {

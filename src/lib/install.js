@@ -47,8 +47,10 @@ async function requestPayloadText(rawUrl) {
     });
 
     req.on("error", (error) => {
-      debugLog("fallback request error", { rawUrl, message: error.message });
-      reject(error);
+      debugLog("fallback request error", { rawUrl, code: error.code, message: error.message, errno: error.errno });
+      // 构造更完整的错误信息
+      const errorDetail = error.code || error.message || `errno ${error.errno}` || "unknown network error";
+      reject(new Error(`Network error: ${errorDetail} (${parsed.hostname})`));
     });
     req.end();
   });

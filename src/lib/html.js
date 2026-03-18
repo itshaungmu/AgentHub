@@ -1643,7 +1643,7 @@ export function renderAgentDetailPage(manifest) {
         </div>
       </div>
       <div class="detail-install" title="Click to copy">
-        <span class="code-text">npx @zshuangmu/agenthub install ${manifest.slug} --server https://agenthub.cyou --target-workspace ./my-workspace</span>
+        <span class="code-text">npx github:itshaungmu/AgentHub install ${manifest.slug} --target-workspace ./my-workspace</span>
         <button class="copy-btn" title="Copy">📋</button>
       </div>
     </div>
@@ -1696,7 +1696,7 @@ export function renderAgentDetailPage(manifest) {
           <span class="badge-new">推荐</span>
           <div class="install-label">npx (无需预安装)</div>
           <div class="detail-install" title="Click to copy">
-            <span class="code-text">npx @zshuangmu/agenthub install ${manifest.slug} --server https://agenthub.cyou --target-workspace ./my-workspace</span>
+            <span class="code-text">npx github:itshaungmu/AgentHub install ${manifest.slug} --target-workspace ./my-workspace</span>
             <button class="copy-btn" title="Copy">📋</button>
           </div>
         </div>

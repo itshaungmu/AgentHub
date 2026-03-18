@@ -3,10 +3,8 @@ import { installBundle } from "../lib/install.js";
 import { writeJson } from "../lib/fs-utils.js";
 
 export async function installCommand(agentSpec, options) {
-  const targetWorkspace = path.resolve(options.targetWorkspace);
-  if (!targetWorkspace) {
-    throw new Error("--target-workspace is required");
-  }
+  // 未显式提供时，默认在当前目录执行安装
+  const targetWorkspace = path.resolve(options.targetWorkspace || process.cwd());
 
   // 默认走远程服务器，提升网站复制命令可用性
   if (!options.registry && !options.server) {

@@ -39,7 +39,7 @@ AgentHub v${VERSION} - AI Agent 打包与分发平台
   pack        打包 OpenClaw 工作区为 Agent Bundle
   publish     发布 Bundle 到本地 Registry
   publish-remote  发布 Bundle 到远程服务器
-  install     安装 Agent 到目标工作区
+  install     安装 Agent 到目标工作区（默认当前目录）
   search      搜索 Registry 中的 Agent
   info        查看 Agent 详情
   list        列出当前目录/指定目录的已安装 Agent

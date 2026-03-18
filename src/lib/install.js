@@ -13,8 +13,28 @@ async function applyBundleDir({ bundleDir, targetWorkspace }) {
   return { manifest, appliedPath };
 }
 
-async function installFromRemote({ serverUrl, agentSpec, targetWorkspace }) {
+/**
+ * 解析 agentSpec，支持两种格式：
+ * - 短名格式：slug 或 slug:version
+ * - URI 格式：agenthub://owner/slug@version
+ */
+function parseAgentSpec(agentSpec) {
+  // URI 格式：agenthub://owner/slug@version
+  if (agentSpec.startsWith("agenthub://")) {
+    const uri = agentSpec.slice("agenthub://".length);
+    // owner/slug@version -> slug@version
+    const parts = uri.split("/");
+    const lastPart = parts[parts.length - 1] || parts[parts.length - 2];
+    const [slug, version] = lastPart.split("@");
+    return { slug, version: version || undefined };
+  }
+  // 短名格式：slug 或 slug:version
   const [slug, version] = agentSpec.split(":");
+  return { slug, version: version || undefined };
+}
+
+async function installFromRemote({ serverUrl, agentSpec, targetWorkspace }) {
+  const { slug, version } = parseAgentSpec(agentSpec);
   const url = new URL(`/api/agents/${slug}/download`, serverUrl);
   if (version) {
     url.searchParams.set("version", version);

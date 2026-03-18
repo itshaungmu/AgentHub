@@ -1643,7 +1643,7 @@ export function renderAgentDetailPage(manifest) {
         </div>
       </div>
       <div class="detail-install" title="Click to copy">
-        <span class="code-text">npx @zshuangmu/agenthub install ${manifest.slug}</span>
+        <span class="code-text">npx @zshuangmu/agenthub install ${manifest.slug} --target-workspace ./my-workspace</span>
         <button class="copy-btn" title="Copy">📋</button>
       </div>
     </div>

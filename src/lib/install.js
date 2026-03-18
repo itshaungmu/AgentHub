@@ -2,6 +2,64 @@ import path from "node:path";
 import { copyDir, ensureDir, readJson, writeJson } from "./fs-utils.js";
 import { readAgentInfo } from "./registry.js";
 import { materializeBundlePayload } from "./bundle-transfer.js";
+import { request as httpsRequest } from "node:https";
+import { request as httpRequest } from "node:http";
+
+async function requestPayloadText(rawUrl) {
+  const parsed = new URL(rawUrl);
+  const transport = parsed.protocol === "http:" ? httpRequest : httpsRequest;
+
+  return await new Promise((resolve, reject) => {
+    const req = transport(
+      {
+        method: "GET",
+        hostname: parsed.hostname,
+        port: parsed.port,
+        path: `${parsed.pathname}${parsed.search || ""}`,
+        protocol: parsed.protocol,
+        headers: {
+          "User-Agent": "agenthub-cli/0.1.2",
+          Accept: "application/json",
+        },
+      },
+      (res) => {
+        let data = "";
+        res.on("data", (chunk) => {
+          data += chunk;
+        });
+        res.on("end", () => {
+          if (res.statusCode < 200 || res.statusCode >= 300) {
+            reject(new Error(`Remote install failed: ${res.statusCode} ${res.statusMessage || ""}`));
+            return;
+          }
+          resolve(data);
+        });
+      },
+    );
+
+    req.on("error", (error) => reject(error));
+    req.end();
+  });
+}
+
+async function fetchPayload(url) {
+  const baseUrl = url.toString();
+
+  try {
+    const response = await fetch(baseUrl);
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    return response;
+  } catch (err) {
+    const payloadText = await requestPayloadText(baseUrl);
+    return {
+      ok: true,
+      json: async () => JSON.parse(payloadText),
+      statusText: "OK",
+    };
+  }
+}
 
 async function applyBundleDir({ bundleDir, targetWorkspace }) {
   const manifest = await readJson(path.join(bundleDir, "MANIFEST.json"));
@@ -39,10 +97,18 @@ async function installFromRemote({ serverUrl, agentSpec, targetWorkspace }) {
   if (version) {
     url.searchParams.set("version", version);
   }
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Remote install failed: ${response.status} ${await response.text()}`);
+
+  let response;
+  try {
+    response = await fetchPayload(url);
+  } catch (error) {
+    throw new Error(`Remote install failed: ${error.message}`);
   }
+
+  if (!response.ok) {
+    throw new Error(`Remote install failed: ${response.status} ${response.statusText}`);
+  }
+
   const payload = await response.json();
   const bundleDir = await materializeBundlePayload(payload);
   return applyBundleDir({ bundleDir, targetWorkspace });

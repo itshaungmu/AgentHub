@@ -465,7 +465,10 @@ async function main() {
         process.exitCode = 1;
     }
   } catch (error) {
-    console.error(`\n❌ 错误: ${error.message}`);
+    // 提取更详细的错误信息
+    const causeMsg = error.cause?.errors?.[0]?.message || error.cause?.message || "";
+    const detailMsg = causeMsg ? `${error.message}\n   原因: ${causeMsg}` : error.message;
+    console.error(`\n❌ 错误: ${detailMsg}`);
     process.exitCode = 1;
   }
 }

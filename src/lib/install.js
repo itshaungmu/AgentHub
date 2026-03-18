@@ -119,8 +119,11 @@ async function installFromRemote({ serverUrl, agentSpec, targetWorkspace }) {
   try {
     response = await fetchPayload(url);
   } catch (error) {
-    debugLog("remote install failed", { slug, error: error.message });
-    throw new Error(`Remote install failed: ${error.message}`);
+    debugLog("remote install failed", { slug, error: error.message, cause: error.cause });
+    // 提取更详细的错误信息
+    const causeMsg = error.cause?.errors?.[0]?.message || error.cause?.message || "";
+    const detailMsg = causeMsg ? `${error.message}: ${causeMsg}` : error.message;
+    throw new Error(`Remote install failed: ${detailMsg}`);
   }
 
   if (!response.ok) {

@@ -16,9 +16,17 @@ import {
   searchCommand,
   apiCommand,
   webCommand,
+  updateCommand,
+  rollbackCommand,
+  listCommand,
+  formatListOutput,
+  statsCommand,
+  formatStatsOutput,
+  versionsCommand,
+  formatVersionsOutput,
 } from "./index.js";
 
-const VERSION = "0.1.0";
+const VERSION = "0.1.2";
 
 function printHelp() {
   console.log(`
@@ -34,6 +42,11 @@ AgentHub v${VERSION} - AI Agent 打包与分发平台
   install     安装 Agent 到目标工作区
   search      搜索 Registry 中的 Agent
   info        查看 Agent 详情
+  list        列出当前目录/指定目录的已安装 Agent
+  versions    查看 Agent 版本历史
+  update      更新已安装 Agent 到最新版
+  rollback    回滚已安装 Agent 到指定版本
+  stats       查看 Agent 统计信息
   serve       启动 Web + API 服务
 
 选项:
@@ -121,6 +134,70 @@ agenthub search - 搜索 Agent
 示例:
   agenthub search "code review" --registry ./.registry
   agenthub search "" --registry ./.registry  # 列出所有
+`,
+    list: `
+agenthub list - 列出已安装 Agent
+
+用法:
+  agenthub list [--target-workspace <dir>]
+
+选项:
+  --target-workspace <dir>  指定工作区目录（可选）
+
+示例:
+  agenthub list
+  agenthub list --target-workspace ./my-workspace
+`,
+    versions: `
+agenthub versions - 查看版本历史
+
+用法:
+  agenthub versions <agent-slug> --registry <dir>
+
+选项:
+  --registry <dir>    Registry 目录 (必需)
+
+示例:
+  agenthub versions workspace --registry ./.registry
+`,
+    update: `
+agenthub update - 更新 Agent 到最新版
+
+用法:
+  agenthub update <agent-slug> --registry <dir> --target-workspace <dir>
+
+选项:
+  --registry <dir>          Registry 目录 (必需)
+  --target-workspace <dir>  目标工作区目录 (必需)
+
+示例:
+  agenthub update workspace --registry ./.registry --target-workspace ./my-workspace
+`,
+    rollback: `
+agenthub rollback - 回滚 Agent 到指定版本
+
+用法:
+  agenthub rollback <agent-slug> --to <version> --registry <dir> --target-workspace <dir>
+
+选项:
+  --to <version>            目标版本 (必需)
+  --registry <dir>          Registry 目录 (必需)
+  --target-workspace <dir>  目标工作区目录 (必需)
+
+示例:
+  agenthub rollback workspace --to 1.0.0 --registry ./.registry --target-workspace ./my-workspace
+`,
+    stats: `
+agenthub stats - 查看 Agent 统计信息
+
+用法:
+  agenthub stats <agent-slug> --registry <dir>
+
+选项:
+  --registry <dir>    Registry 目录 (必需)
+
+示例:
+  agenthub stats workspace --registry ./.registry
 `,
     serve: `
 agenthub serve - 启动完整服务（前端+后端）
@@ -265,9 +342,59 @@ async function main() {
           return;
         }
         console.log(`\n📥 正在安装 ${rest[0]}...\n`);
-        const result = await installCommand(rest[0], options);
-        console.log(`✓ 已安装 ${result.manifest.slug}@${result.manifest.version}`);
+        const installResult = await installCommand(rest[0], options);
+        console.log(`✓ 已安装 ${installResult.manifest.slug}@${installResult.manifest.version}`);
         console.log(`  位置: ${options.targetWorkspace || "当前目录"}`);
+        return;
+      }
+
+      case "list": {
+        const list = await listCommand(options);
+        console.log(formatListOutput(list));
+        return;
+      }
+
+      case "versions": {
+        if (!rest[0]) {
+          console.error("错误: 需要指定 agent slug");
+          process.exitCode = 1;
+          return;
+        }
+        const versions = await versionsCommand(rest[0], options);
+        console.log(formatVersionsOutput(rest[0], versions));
+        return;
+      }
+
+      case "update": {
+        if (!rest[0]) {
+          console.error("错误: 需要指定 agent slug");
+          process.exitCode = 1;
+          return;
+        }
+        const updateResult = await updateCommand(rest[0], options);
+        console.log(updateResult.message);
+        return;
+      }
+
+      case "rollback": {
+        if (!rest[0]) {
+          console.error("错误: 需要指定 agent slug");
+          process.exitCode = 1;
+          return;
+        }
+        const rollbackResult = await rollbackCommand(rest[0], options);
+        console.log(rollbackResult.message);
+        return;
+      }
+
+      case "stats": {
+        if (!rest[0]) {
+          console.error("错误: 需要指定 agent slug");
+          process.exitCode = 1;
+          return;
+        }
+        const stats = await statsCommand(rest[0], options);
+        console.log(formatStatsOutput(stats));
         return;
       }
 

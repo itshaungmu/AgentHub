@@ -87,6 +87,11 @@ agenthub serve --registry ./.registry --port 3000
 | `search` | 搜索仓库中的 Agent |
 | `info` | 查看 Agent 详情 |
 | `install` | 安装 Agent 到工作区 |
+| `list` | 列出已安装的 Agent |
+| `versions` | 查看版本历史 |
+| `update` | 更新到最新版 |
+| `rollback` | 回滚到指定版本 |
+| `stats` | 查看详细统计 |
 | `serve` | 启动 Web + API 服务 |
 | `api` | 仅启动 API 服务 |
 | `web` | 仅启动 Web 前端 |

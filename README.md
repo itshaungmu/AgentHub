@@ -86,6 +86,11 @@ Visit http://localhost:3000 to see your agents!
 | `search` | Search agents in registry |
 | `info` | View agent details |
 | `install` | Install agent to workspace |
+| `list` | List installed agents in workspace |
+| `versions` | List available versions for one agent |
+| `update` | Update installed agent to latest version |
+| `rollback` | Roll back an installed agent |
+| `stats` | View detailed statistics for an agent |
 | `serve` | Start web + API service |
 | `api` | Start API server only |
 | `web` | Start web frontend only |

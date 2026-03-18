@@ -1,5 +1,6 @@
 import path from "node:path";
 import { installBundle } from "../lib/install.js";
+import { writeJson } from "../lib/fs-utils.js";
 
 export async function installCommand(agentSpec, options) {
   const targetWorkspace = path.resolve(options.targetWorkspace);
@@ -12,17 +13,27 @@ export async function installCommand(agentSpec, options) {
     options.server = "https://agenthub.cyou";
   }
 
+  let result;
   if (options.registry) {
-    return installBundle({
+    result = await installBundle({
       registryDir: path.resolve(options.registry),
+      agentSpec,
+      targetWorkspace,
+    });
+  } else {
+    result = await installBundle({
+      serverUrl: options.server,
       agentSpec,
       targetWorkspace,
     });
   }
 
-  return installBundle({
-    serverUrl: options.server,
-    agentSpec,
-    targetWorkspace,
+  const installRecordPath = path.join(targetWorkspace, ".agenthub", "install.json");
+  await writeJson(installRecordPath, {
+    slug: result.manifest.slug,
+    version: result.manifest.version,
+    installedAt: new Date().toISOString(),
   });
+
+  return result;
 }

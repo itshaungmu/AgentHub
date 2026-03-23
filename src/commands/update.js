@@ -8,13 +8,13 @@ import { pathExists, readJson, writeJson } from "../lib/fs-utils.js";
 import { installBundle } from "../lib/install.js";
 import { versionsCommand } from "./versions.js";
 
-export async function updateCommand(agentSpec, options) {
-  const registryDir = path.resolve(options.registry);
+export async function updateCommand(agentSpec, options = {}) {
+  const registryDir = options.registry ? path.resolve(options.registry) : null;
   const targetWorkspace = options.targetWorkspace ? path.resolve(options.targetWorkspace) : null;
   const [slug] = agentSpec.split(":");
 
   // 获取可用版本
-  const versions = await versionsCommand(slug, { registry: registryDir });
+  const versions = await versionsCommand(slug, registryDir ? { registry: registryDir } : options);
   if (versions.length === 0) {
     throw new Error(`Agent not found: ${slug}`);
   }
@@ -41,11 +41,16 @@ export async function updateCommand(agentSpec, options) {
   }
 
   // 执行更新
-  const result = await installBundle({
-    registryDir,
+  const installOptions = {
     agentSpec: `${slug}:${latestVersion}`,
     targetWorkspace,
-  });
+  };
+  if (registryDir) {
+    installOptions.registryDir = registryDir;
+  } else {
+    installOptions.serverUrl = options.server || "https://agenthub.cyou";
+  }
+  const result = await installBundle(installOptions);
 
   // 记录更新
   if (targetWorkspace) {

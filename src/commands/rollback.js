@@ -8,8 +8,8 @@ import { pathExists, readJson, writeJson } from "../lib/fs-utils.js";
 import { installBundle } from "../lib/install.js";
 import { versionsCommand } from "./versions.js";
 
-export async function rollbackCommand(agentSpec, options) {
-  const registryDir = path.resolve(options.registry);
+export async function rollbackCommand(agentSpec, options = {}) {
+  const registryDir = options.registry ? path.resolve(options.registry) : null;
   const targetWorkspace = options.targetWorkspace ? path.resolve(options.targetWorkspace) : null;
   const targetVersion = options.to;
 
@@ -20,7 +20,7 @@ export async function rollbackCommand(agentSpec, options) {
   const [slug] = agentSpec.split(":");
 
   // 验证目标版本存在
-  const versions = await versionsCommand(slug, { registry: registryDir });
+  const versions = await versionsCommand(slug, registryDir ? { registry: registryDir } : options);
   const versionExists = versions.some((v) => v.version === targetVersion);
   if (!versionExists) {
     throw new Error(`版本 ${targetVersion} 不存在`);
@@ -37,11 +37,16 @@ export async function rollbackCommand(agentSpec, options) {
   }
 
   // 执行回滚
-  const result = await installBundle({
-    registryDir,
+  const installOptions = {
     agentSpec: `${slug}:${targetVersion}`,
     targetWorkspace,
-  });
+  };
+  if (registryDir) {
+    installOptions.registryDir = registryDir;
+  } else {
+    installOptions.serverUrl = options.server || "https://agenthub.cyou";
+  }
+  const result = await installBundle(installOptions);
 
   // 记录回滚
   if (targetWorkspace) {

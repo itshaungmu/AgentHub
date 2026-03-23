@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { createTempDir, PROJECT_ROOT, readJson, runCli, setupWorkspace, writeJson } from "./helpers.js";
 
+
 async function buildTwoVersions(temp) {
   const workspace = path.join(temp, "workspace");
   const output = path.join(temp, "output");
@@ -95,6 +96,54 @@ test("verify fails clearly when install record is missing", async () => {
   assert.equal(result.status, 1);
   assert.match(result.stdout, /Verify failed/);
   assert.match(result.stdout, /install record missing/);
+});
+
+test("update and rollback work against remote server workflows", async () => {
+  const { createServer } = await import("../src/server.js");
+  const { updateCommand } = await import("../src/commands/update.js");
+  const { rollbackCommand } = await import("../src/commands/rollback.js");
+  const { verifyCommand } = await import("../src/commands/verify.js");
+  const temp = await createTempDir("agenthub-remote-lifecycle-");
+  const { registry, targetWorkspace } = await buildTwoVersions(temp);
+
+  assert.equal(
+    runCli(["install", "workspace:1.0.0", "--registry", registry, "--target-workspace", targetWorkspace]).status,
+    0,
+  );
+
+  const server = await createServer({ registryDir: registry, port: 0 });
+  try {
+    const updateResult = await updateCommand("workspace", {
+      server: server.baseUrl,
+      targetWorkspace,
+    });
+    assert.equal(updateResult.updated, true);
+    assert.equal(updateResult.currentVersion, "1.1.0");
+
+    const verifyUpdated = await verifyCommand("workspace", {
+      server: server.baseUrl,
+      targetWorkspace,
+    });
+    assert.equal(verifyUpdated.verified, true);
+    assert.equal(verifyUpdated.installRecord.version, "1.1.0");
+
+    const rollbackResult = await rollbackCommand("workspace", {
+      to: "1.0.0",
+      server: server.baseUrl,
+      targetWorkspace,
+    });
+    assert.equal(rollbackResult.rolledBack, true);
+    assert.equal(rollbackResult.currentVersion, "1.0.0");
+
+    const verifyRolledBack = await verifyCommand("workspace", {
+      server: server.baseUrl,
+      targetWorkspace,
+    });
+    assert.equal(verifyRolledBack.verified, true);
+    assert.equal(verifyRolledBack.installRecord.version, "1.0.0");
+  } finally {
+    await server.close();
+  }
 });
 
 

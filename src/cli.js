@@ -170,40 +170,46 @@ agenthub verify - 校验已安装 Agent
 agenthub versions - 查看版本历史
 
 用法:
-  agenthub versions <agent-slug> --registry <dir>
+  agenthub versions <agent-slug> [--registry <dir> | --server <url>]
 
 选项:
-  --registry <dir>    Registry 目录 (必需)
+  --registry <dir>          本地 Registry 目录（与 --server 二选一）
+  --server <url>            远程服务器地址（默认: https://agenthub.cyou）
 
 示例:
   agenthub versions workspace --registry ./.registry
+  agenthub versions workspace --server https://agenthub.cyou
 `,
     update: `
 agenthub update - 更新 Agent 到最新版
 
 用法:
-  agenthub update <agent-slug> --registry <dir> --target-workspace <dir>
+  agenthub update <agent-slug> [--registry <dir> | --server <url>] --target-workspace <dir>
 
 选项:
-  --registry <dir>          Registry 目录 (必需)
+  --registry <dir>          本地 Registry 目录（与 --server 二选一）
+  --server <url>            远程服务器地址（默认: https://agenthub.cyou）
   --target-workspace <dir>  目标工作区目录 (必需)
 
 示例:
   agenthub update workspace --registry ./.registry --target-workspace ./my-workspace
+  agenthub update workspace --server https://agenthub.cyou --target-workspace ./my-workspace
 `,
     rollback: `
 agenthub rollback - 回滚 Agent 到指定版本
 
 用法:
-  agenthub rollback <agent-slug> --to <version> --registry <dir> --target-workspace <dir>
+  agenthub rollback <agent-slug> --to <version> [--registry <dir> | --server <url>] --target-workspace <dir>
 
 选项:
   --to <version>            目标版本 (必需)
-  --registry <dir>          Registry 目录 (必需)
+  --registry <dir>          本地 Registry 目录（与 --server 二选一）
+  --server <url>            远程服务器地址（默认: https://agenthub.cyou）
   --target-workspace <dir>  目标工作区目录 (必需)
 
 示例:
   agenthub rollback workspace --to 1.0.0 --registry ./.registry --target-workspace ./my-workspace
+  agenthub rollback workspace --to 1.0.0 --server https://agenthub.cyou --target-workspace ./my-workspace
 `,
     stats: `
 agenthub stats - 查看 Agent 统计信息

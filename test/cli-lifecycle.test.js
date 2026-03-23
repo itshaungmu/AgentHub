@@ -35,7 +35,7 @@ async function buildTwoVersions(temp) {
   return { registry, targetWorkspace: path.join(temp, "installed-workspace") };
 }
 
-test("list/update/rollback commands work for local registry workflows", async () => {
+test("list/verify/update/rollback commands work for local registry workflows", async () => {
   const temp = await createTempDir("agenthub-lifecycle-");
   const { registry, targetWorkspace } = await buildTwoVersions(temp);
 
@@ -47,6 +47,11 @@ test("list/update/rollback commands work for local registry workflows", async ()
   const listResult = runCli(["list", "--target-workspace", targetWorkspace]);
   assert.equal(listResult.status, 0);
   assert.match(listResult.stdout, /workspace@1\.0\.0/);
+
+  const verifyResult = runCli(["verify", "workspace", "--registry", registry, "--target-workspace", targetWorkspace]);
+  assert.equal(verifyResult.status, 0);
+  assert.match(verifyResult.stdout, /Verify passed/);
+  assert.match(verifyResult.stdout, /PASS workspace_file:AGENTS\.md/);
 
   const versionsResult = runCli(["versions", "workspace", "--registry", registry]);
   assert.equal(versionsResult.status, 0);
@@ -81,9 +86,21 @@ test("list/update/rollback commands work for local registry workflows", async ()
   assert.match(statsResult.stdout, /workspace/);
 });
 
+test("verify fails clearly when install record is missing", async () => {
+  const temp = await createTempDir("agenthub-verify-missing-");
+  const targetWorkspace = path.join(temp, "workspace");
+  await setupWorkspace(targetWorkspace);
+
+  const result = runCli(["verify", "workspace", "--target-workspace", targetWorkspace]);
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /Verify failed/);
+  assert.match(result.stdout, /install record missing/);
+});
+
 
 test("command help exposes lifecycle entries", async () => {
   assert.match(runCli(["list", "--help"]).stdout, /agenthub list/);
+  assert.match(runCli(["verify", "--help"]).stdout, /agenthub verify/);
   assert.match(runCli(["update", "--help"]).stdout, /agenthub update/);
   assert.match(runCli(["rollback", "--help"]).stdout, /agenthub rollback/);
   assert.match(runCli(["stats", "--help"]).stdout, /agenthub stats/);

@@ -9,6 +9,8 @@
 import {
   infoCommand,
   installCommand,
+  verifyCommand,
+  formatVerifyOutput,
   packCommand,
   publishCommand,
   publishRemoteCommand,
@@ -43,6 +45,7 @@ AgentHub v${VERSION} - AI Agent 打包与分发平台
   search      搜索 Registry 中的 Agent
   info        查看 Agent 详情
   list        列出当前目录/指定目录的已安装 Agent
+  verify      校验已安装 Agent 是否完整可用
   versions    查看 Agent 版本历史
   update      更新已安装 Agent 到最新版
   rollback    回滚已安装 Agent 到指定版本
@@ -147,6 +150,21 @@ agenthub list - 列出已安装 Agent
 示例:
   agenthub list
   agenthub list --target-workspace ./my-workspace
+`,
+    verify: `
+agenthub verify - 校验已安装 Agent
+
+用法:
+  agenthub verify [agent-slug] [--registry <dir> | --server <url>] [--target-workspace <dir>]
+
+选项:
+  --registry <dir>          本地 Registry 目录（与 --server 二选一）
+  --server <url>            远程服务器地址（默认: https://agenthub.cyou）
+  --target-workspace <dir>  目标工作区目录（默认当前目录）
+
+示例:
+  agenthub verify workspace --registry ./.registry --target-workspace ./my-workspace
+  agenthub verify workspace --server https://agenthub.cyou --target-workspace ./my-workspace
 `,
     versions: `
 agenthub versions - 查看版本历史
@@ -351,6 +369,15 @@ async function main() {
       case "list": {
         const list = await listCommand(options);
         console.log(formatListOutput(list));
+        return;
+      }
+
+      case "verify": {
+        const result = await verifyCommand(rest[0], options);
+        console.log(formatVerifyOutput(result));
+        if (!result.verified) {
+          process.exitCode = 1;
+        }
         return;
       }
 

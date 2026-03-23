@@ -5,11 +5,44 @@
 
 import path from "node:path";
 import { pathExists, readJson } from "../lib/fs-utils.js";
+import { fetchRemoteJson } from "../lib/remote.js";
 
-export async function statsCommand(agentSpec, options) {
-  const registryDir = path.resolve(options.registry);
+export async function statsCommand(agentSpec, options = {}) {
   const [slug] = agentSpec.split(":");
 
+  if (!options.registry) {
+    const [manifest, agentsResult] = await Promise.all([
+      fetchRemoteJson(`/api/agents/${slug}`, options),
+      fetchRemoteJson(`/api/agents?q=${encodeURIComponent(slug)}`, options),
+    ]);
+
+    const agentEntries = (agentsResult.agents || []).filter((entry) => entry.slug === slug);
+    if (agentEntries.length === 0) {
+      throw new Error(`Agent not found: ${slug}`);
+    }
+
+    const latestEntry = agentEntries.sort((a, b) =>
+      b.version.localeCompare(a.version, undefined, { numeric: true })
+    )[0];
+
+    return {
+      slug,
+      name: manifest.name,
+      latestVersion: latestEntry.version,
+      totalVersions: agentEntries.length,
+      description: manifest.description,
+      author: manifest.author,
+      runtime: manifest.runtime,
+      includes: manifest.includes,
+      requirements: manifest.requirements,
+      metadata: manifest.metadata,
+      downloads: manifest.downloads || 0,
+      stars: manifest.stats?.stars || 0,
+      rating: manifest.stats?.rating || null,
+    };
+  }
+
+  const registryDir = path.resolve(options.registry);
   const indexPath = path.join(registryDir, "index.json");
   if (!(await pathExists(indexPath))) {
     throw new Error(`Agent not found: ${slug}`);
@@ -22,12 +55,10 @@ export async function statsCommand(agentSpec, options) {
     throw new Error(`Agent not found: ${slug}`);
   }
 
-  // 获取最新版本的完整信息
   const latestEntry = agentEntries.sort((a, b) =>
     b.version.localeCompare(a.version, undefined, { numeric: true })
   )[0];
 
-  // 读取完整 MANIFEST
   const manifestPath = path.join(
     registryDir,
     "agents",
@@ -37,8 +68,7 @@ export async function statsCommand(agentSpec, options) {
   );
   const manifest = await readJson(manifestPath);
 
-  // 统计信息
-  const stats = {
+  return {
     slug,
     name: manifest.name,
     latestVersion: latestEntry.version,
@@ -49,13 +79,10 @@ export async function statsCommand(agentSpec, options) {
     includes: manifest.includes,
     requirements: manifest.requirements,
     metadata: manifest.metadata,
-    // 以下数据在实际系统中会从数据库获取
     downloads: manifest.stats?.installs || 0,
     stars: manifest.stats?.stars || 0,
     rating: manifest.stats?.rating || null,
   };
-
-  return stats;
 }
 
 export function formatStatsOutput(stats) {

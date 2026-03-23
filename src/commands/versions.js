@@ -5,11 +5,25 @@
 
 import { pathExists, readJson } from "../lib/fs-utils.js";
 import path from "node:path";
+import { fetchRemoteJson } from "../lib/remote.js";
 
-export async function versionsCommand(agentSpec, options) {
-  const registryDir = path.resolve(options.registry);
+export async function versionsCommand(agentSpec, options = {}) {
   const [slug] = agentSpec.split(":");
 
+  if (!options.registry) {
+    const result = await fetchRemoteJson(`/api/agents?q=${encodeURIComponent(slug)}`, options);
+    return (result.agents || [])
+      .filter((entry) => entry.slug === slug)
+      .map((entry) => ({
+        version: entry.version,
+        name: entry.name,
+        description: entry.description,
+        updatedAt: entry.updatedAt || entry.createdAt,
+      }))
+      .sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }));
+  }
+
+  const registryDir = path.resolve(options.registry);
   const indexPath = path.join(registryDir, "index.json");
   if (!(await pathExists(indexPath))) {
     return [];

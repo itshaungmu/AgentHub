@@ -51,8 +51,8 @@ test("list/verify/update/rollback commands work for local registry workflows", a
 
   const verifyResult = runCli(["verify", "workspace", "--registry", registry, "--target-workspace", targetWorkspace]);
   assert.equal(verifyResult.status, 0);
-  assert.match(verifyResult.stdout, /Verify passed/);
-  assert.match(verifyResult.stdout, /PASS workspace_file:AGENTS\.md/);
+  assert.match(verifyResult.stdout, /校验通过/);
+  assert.match(verifyResult.stdout, /PASS workspace file: AGENTS\.md/);
 
   const versionsResult = runCli(["versions", "workspace", "--registry", registry]);
   assert.equal(versionsResult.status, 0);
@@ -94,7 +94,7 @@ test("verify fails clearly when install record is missing", async () => {
 
   const result = runCli(["verify", "workspace", "--target-workspace", targetWorkspace]);
   assert.equal(result.status, 1);
-  assert.match(result.stdout, /Verify failed/);
+  assert.match(result.stdout, /校验失败/);
   assert.match(result.stdout, /install record missing/);
 });
 

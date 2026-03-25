@@ -2,6 +2,7 @@ import path from "node:path";
 import { pathExists, readJson } from "../lib/fs-utils.js";
 import { parseSpec } from "../lib/registry.js";
 import { infoCommand } from "./info.js";
+import { success, error, warning, info as infoColor, highlight, muted, symbols } from "../lib/colors.js";
 
 export async function verifyCommand(agentSpec, options = {}) {
   const targetWorkspace = path.resolve(options.targetWorkspace || process.cwd());
@@ -78,17 +79,55 @@ export async function verifyCommand(agentSpec, options = {}) {
 
 export function formatVerifyOutput(result) {
   const lines = [];
-  lines.push(`\n${result.verified ? "✅" : "❌"} Verify ${result.verified ? "passed" : "failed"}\n`);
+
+  // 标题
+  if (result.verified) {
+    lines.push(`\n${success(`${symbols.success} 校验通过`)}\n`);
+  } else {
+    lines.push(`\n${error(`${symbols.error} 校验失败`)}\n`);
+  }
+
+  // Agent 信息
   if (result.installRecord) {
-    lines.push(`Agent: ${result.installRecord.slug}@${result.installRecord.version}`);
+    lines.push(`${highlight("Agent:")} ${result.installRecord.slug}@${result.installRecord.version}`);
   }
-  lines.push(`Workspace: ${result.targetWorkspace}`);
+  lines.push(`${highlight("Workspace:")} ${result.targetWorkspace}`);
   lines.push("");
+
+  // 检查结果
+  lines.push(`${infoColor("检查项目:")}`);
   for (const check of result.checks || []) {
-    lines.push(`- ${check.ok ? "PASS" : "FAIL"} ${check.name}: ${check.detail}`);
+    const status = check.ok
+      ? success(`${symbols.success} PASS`)
+      : error(`${symbols.error} FAIL`);
+    const checkName = check.name.replace(":", ": ").replace("_", " ");
+    lines.push(`  ${status} ${muted(checkName)}`);
+    if (!check.ok || check.name.includes(":")) {
+      lines.push(`         ${muted(check.detail)}`);
+    }
   }
+
+  // 失败原因
   if (result.reason) {
-    lines.push(`\nReason: ${result.reason}`);
+    lines.push(`\n${warning(`原因: ${result.reason}`)}`);
   }
+
+  // 健康度建议
+  if (result.verified) {
+    lines.push(`\n${success("Agent 安装完整，可以正常使用。")}`);
+  } else {
+    lines.push(`\n${warning("建议:")}`);
+    if (result.checks?.some(c => c.name === "install_record" && !c.ok)) {
+      lines.push(`  - 运行 ${highlight("agenthub install <agent-slug>")} 安装 Agent`);
+    }
+    if (result.checks?.some(c => c.name.includes("workspace_file") && !c.ok)) {
+      lines.push(`  - 检查 workspace 文件是否完整`);
+      lines.push(`  - 尝试重新安装: ${highlight("agenthub install <agent-slug> --force")}`);
+    }
+    if (result.checks?.some(c => c.name === "applied_config" && !c.ok)) {
+      lines.push(`  - 配置文件未应用，检查 OPENCLAW.template.json`);
+    }
+  }
+
   return lines.join("\n");
 }

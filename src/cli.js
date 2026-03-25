@@ -28,6 +28,8 @@ import {
   formatVersionsOutput,
 } from "./index.js";
 
+import { success, error, warning, info as infoColor, highlight, muted, symbols } from "./lib/colors.js";
+
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const VERSION = require("../package.json").version;
@@ -40,7 +42,7 @@ const VERSION = require("../package.json").version;
  */
 function requireArg(arg, message) {
   if (!arg) {
-    console.error(message);
+    console.error(error(message));
     process.exitCode = 1;
     return false;
   }
@@ -313,38 +315,38 @@ async function main() {
     switch (command) {
       case "pack": {
         if (!options.workspace || !options.config) {
-          console.error("错误: --workspace 和 --config 是必需的");
-          console.log("\n运行 'agenthub pack --help' 查看帮助");
+          console.error(error("错误: --workspace 和 --config 是必需的"));
+          console.log(muted("\n运行 'agenthub pack --help' 查看帮助"));
           process.exitCode = 1;
           return;
         }
         const result = await packCommand(options);
-        console.log(`✓ 打包完成: ${result.bundleDir}`);
+        console.log(success(`${symbols.success} 打包完成: ${result.bundleDir}`));
         return;
       }
 
       case "publish": {
         if (!requireArg(rest[0], "错误: 需要指定 bundle 目录")) return;
         const result = await publishCommand(rest[0], options);
-        console.log(`✓ 已发布 ${result.slug}@${result.version}`);
+        console.log(success(`${symbols.success} 已发布 ${highlight(`${result.slug}@${result.version}`)}`));
         return;
       }
 
       case "publish-remote": {
         if (!requireArg(rest[0], "错误: 需要指定 bundle 目录")) return;
         const result = await publishRemoteCommand(rest[0], options);
-        console.log(`✓ 已发布到远程 ${result.slug}@${result.version}`);
+        console.log(success(`${symbols.success} 已发布到远程 ${highlight(`${result.slug}@${result.version}`)}`));
         return;
       }
 
       case "search": {
         const results = await searchCommand(rest[0] || "", options);
         if (results.length === 0) {
-          console.log("未找到匹配的 Agent");
+          console.log(warning("未找到匹配的 Agent"));
         } else {
-          console.log(`\n找到 ${results.length} 个 Agent:\n`);
+          console.log(`\n${infoColor(`找到 ${results.length} 个 Agent:`)}\n`);
           for (const entry of results) {
-            console.log(`  ${entry.slug}@${entry.version} - ${entry.description || ""}`);
+            console.log(`  ${highlight(entry.slug)}${muted("@")}${entry.version} ${muted("-")} ${entry.description || ""}`);
           }
         }
         return;
@@ -353,23 +355,23 @@ async function main() {
       case "info": {
         if (!requireArg(rest[0], "错误: 需要指定 agent slug")) return;
         const result = await infoCommand(rest[0], options);
-        console.log(`\n📦 ${result.name} (${result.slug}@${result.version})`);
+        console.log(`\n${highlight("📦")} ${result.name} (${result.slug}@${result.version})`);
         console.log(`   ${result.description}`);
-        console.log(`   Runtime: ${result.runtime?.type || "openclaw"} ${result.runtime?.version || ""}`);
+        console.log(`   ${muted("Runtime:")} ${result.runtime?.type || "openclaw"} ${result.runtime?.version || ""}`);
         const mem = result.includes?.memory || {};
         if (mem.count > 0) {
-          console.log(`   Memory: ${mem.count} 条 (public: ${mem.public}, portable: ${mem.portable})`);
+          console.log(`   ${muted("Memory:")} ${mem.count} 条 (public: ${mem.public}, portable: ${mem.portable})`);
         }
-        console.log(`\n   安装命令: agenthub install ${result.slug}`);
+        console.log(`\n   ${infoColor("安装命令:")} agenthub install ${result.slug}`);
         return;
       }
 
       case "install": {
         if (!requireArg(rest[0], "错误: 需要指定 agent slug")) return;
-        console.log(`\n📥 正在安装 ${rest[0]}...\n`);
+        console.log(`\n${infoColor("📥 正在安装")} ${highlight(rest[0])}...\n`);
         const installResult = await installCommand(rest[0], options);
-        console.log(`✓ 已安装 ${installResult.manifest.slug}@${installResult.manifest.version}`);
-        console.log(`  位置: ${options.targetWorkspace || "当前目录"}`);
+        console.log(success(`${symbols.success} 已安装 ${highlight(`${installResult.manifest.slug}@${installResult.manifest.version}`)}`));
+        console.log(`  ${muted("位置:")} ${options.targetWorkspace || "当前目录"}`);
         return;
       }
 
@@ -418,11 +420,11 @@ async function main() {
 
       case "serve": {
         const result = await serveCommand(options);
-        console.log(`Server listening at ${result.baseUrl}`);
-        console.log(`\n🌐 AgentHub 服务已启动`);
-        console.log(`   地址: ${result.baseUrl}`);
-        console.log(`   API:  ${result.baseUrl}/api/agents`);
-        console.log(`\n按 Ctrl+C 停止服务\n`);
+        console.log(success(`Server listening at ${result.baseUrl}`));
+        console.log(`\n${highlight("🌐 AgentHub 服务已启动")}`);
+        console.log(`   ${muted("地址:")} ${result.baseUrl}`);
+        console.log(`   ${muted("API:")}  ${result.baseUrl}/api/agents`);
+        console.log(`\n${muted("按 Ctrl+C 停止服务")}\n`);
 
         const shutdown = async () => {
           process.off("SIGINT", shutdown);
@@ -438,12 +440,12 @@ async function main() {
       case "api": {
         const port = options.port || "3001";
         const result = await apiCommand({ ...options, port });
-        console.log(`Server listening at ${result.baseUrl}`);
-        console.log(`\n🔧 API 服务已启动`);
-        console.log(`   地址: ${result.baseUrl}`);
-        console.log(`   端点: ${result.baseUrl}/api/agents`);
-        console.log(`   统计: ${result.baseUrl}/api/stats`);
-        console.log(`\n按 Ctrl+C 停止服务\n`);
+        console.log(success(`Server listening at ${result.baseUrl}`));
+        console.log(`\n${highlight("🔧 API 服务已启动")}`);
+        console.log(`   ${muted("地址:")} ${result.baseUrl}`);
+        console.log(`   ${muted("端点:")} ${result.baseUrl}/api/agents`);
+        console.log(`   ${muted("统计:")} ${result.baseUrl}/api/stats`);
+        console.log(`\n${muted("按 Ctrl+C 停止服务")}\n`);
 
         const shutdown = async () => {
           process.off("SIGINT", shutdown);
@@ -460,11 +462,11 @@ async function main() {
         const port = options.port || "3000";
         const apiBase = options.apiBase || "http://127.0.0.1:3001";
         const result = await webCommand({ port, apiBase });
-        console.log(`Server listening at ${result.baseUrl}`);
-        console.log(`\n🌐 Web 服务已启动`);
-        console.log(`   地址: ${result.baseUrl}`);
-        console.log(`   API:  ${apiBase}`);
-        console.log(`\n按 Ctrl+C 停止服务\n`);
+        console.log(success(`Server listening at ${result.baseUrl}`));
+        console.log(`\n${highlight("🌐 Web 服务已启动")}`);
+        console.log(`   ${muted("地址:")} ${result.baseUrl}`);
+        console.log(`   ${muted("API:")}  ${apiBase}`);
+        console.log(`\n${muted("按 Ctrl+C 停止服务")}\n`);
 
         const shutdown = async () => {
           process.off("SIGINT", shutdown);
@@ -478,15 +480,15 @@ async function main() {
       }
 
       default:
-        console.error(`未知命令: ${command}`);
-        console.log("\n运行 'agenthub --help' 查看可用命令");
+        console.error(error(`未知命令: ${command}`));
+        console.log(muted("\n运行 'agenthub --help' 查看可用命令"));
         process.exitCode = 1;
     }
-  } catch (error) {
+  } catch (err) {
     // 提取更详细的错误信息
-    const causeMsg = error.cause?.errors?.[0]?.message || error.cause?.message || "";
-    const detailMsg = causeMsg ? `${error.message}\n   原因: ${causeMsg}` : error.message;
-    console.error(`\n❌ 错误: ${detailMsg}`);
+    const causeMsg = err.cause?.errors?.[0]?.message || err.cause?.message || "";
+    const detailMsg = causeMsg ? `${err.message}\n   原因: ${causeMsg}` : err.message;
+    console.error(`\n${error(`${symbols.error} 错误:`)} ${detailMsg}`);
     process.exitCode = 1;
   }
 }

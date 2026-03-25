@@ -2,138 +2,12 @@ import path from "node:path";
 import { copyDir, ensureDir, readJson, writeJson } from "./fs-utils.js";
 import { readAgentInfo } from "./registry.js";
 import { materializeBundlePayload } from "./bundle-transfer.js";
-import { request as httpsRequest } from "node:https";
-import { request as httpRequest } from "node:http";
-import { spawn } from "node:child_process";
+import { fetchJsonWithFallback } from "./http.js";
 
 function debugLog(message, details) {
   if (!process.env.AGENTHUB_DEBUG_INSTALL) return;
   const suffix = details ? ` | ${JSON.stringify(details)}` : "";
   console.error(`[agenthub:install] ${message}${suffix}`);
-}
-
-async function requestPayloadText(rawUrl) {
-  const parsed = new URL(rawUrl);
-  const transport = parsed.protocol === "http:" ? httpRequest : httpsRequest;
-  const requestOptions = {
-    method: "GET",
-    hostname: parsed.hostname,
-    port: parsed.port,
-    path: `${parsed.pathname}${parsed.search || ""}`,
-    protocol: parsed.protocol,
-    headers: {
-      "User-Agent": "agenthub-cli/0.1.3",
-      Accept: "application/json",
-    },
-  };
-
-  debugLog("fallback request begin", { url: rawUrl, protocol: parsed.protocol, hostname: parsed.hostname, path: requestOptions.path });
-
-  return await new Promise((resolve, reject) => {
-    const req = transport(requestOptions, (res) => {
-      let data = "";
-      res.on("data", (chunk) => {
-        data += chunk;
-      });
-      res.on("end", () => {
-        if (res.statusCode < 200 || res.statusCode >= 300) {
-          const reason = `${res.statusCode} ${res.statusMessage || ""}`;
-          debugLog("fallback request failed", { reason, rawUrl });
-          reject(new Error(`Remote install failed: ${reason}`));
-          return;
-        }
-        debugLog("fallback request success", { rawUrl, bytes: data.length });
-        resolve(data);
-      });
-    });
-
-    req.on("error", (error) => {
-      debugLog("fallback request error", { rawUrl, code: error.code, message: error.message, errno: error.errno });
-      // 构造更完整的错误信息
-      const errorDetail = error.code || error.message || `errno ${error.errno}` || "unknown network error";
-      reject(new Error(`Network error: ${errorDetail} (${parsed.hostname})`));
-    });
-    req.end();
-  });
-}
-
-// 使用 curl 作为终极 fallback（绕过 Cloudflare 等网络限制）
-async function fetchWithCurl(rawUrl) {
-  debugLog("curl fallback begin", { url: rawUrl });
-
-  return await new Promise((resolve, reject) => {
-    const curl = spawn("curl", [
-      "-s", "-f",  // 静默模式，失败时返回非零
-      "--connect-timeout", "30",
-      "-H", "Accept: application/json",
-      rawUrl
-    ]);
-
-    let stdout = "";
-    let stderr = "";
-
-    curl.stdout.on("data", (data) => { stdout += data; });
-    curl.stderr.on("data", (data) => { stderr += data; });
-
-    curl.on("close", (code) => {
-      if (code !== 0) {
-        debugLog("curl fallback failed", { code, stderr: stderr.slice(0, 200) });
-        reject(new Error(`curl failed with code ${code}: ${stderr.slice(0, 100)}`));
-        return;
-      }
-      debugLog("curl fallback success", { url: rawUrl, bytes: stdout.length });
-      resolve(stdout);
-    });
-
-    curl.on("error", (err) => {
-      debugLog("curl spawn error", { message: err.message });
-      reject(new Error(`Failed to spawn curl: ${err.message}`));
-    });
-  });
-}
-
-async function fetchPayload(url) {
-  const baseUrl = url.toString();
-  debugLog("requesting payload", { url: baseUrl });
-
-  // 1. 尝试原生 fetch
-  try {
-    const response = await fetch(baseUrl);
-    debugLog("primary fetch done", { url: baseUrl, ok: response.ok, status: response.status, statusText: response.statusText });
-    if (!response.ok) {
-      throw new Error(`${response.status} ${response.statusText}`);
-    }
-    return response;
-  } catch (err) {
-    debugLog("primary fetch failed", { url: baseUrl, error: err.message });
-  }
-
-  // 2. 尝试 http/https 模块
-  try {
-    const payloadText = await requestPayloadText(baseUrl);
-    debugLog("http/https fallback success", { url: baseUrl });
-    return {
-      ok: true,
-      json: async () => JSON.parse(payloadText),
-      statusText: "OK",
-    };
-  } catch (err) {
-    debugLog("http/https fallback failed", { url: baseUrl, error: err.message });
-  }
-
-  // 3. 最终 fallback: 使用 curl
-  try {
-    const payloadText = await fetchWithCurl(baseUrl);
-    debugLog("curl fallback success", { url: baseUrl });
-    return {
-      ok: true,
-      json: async () => JSON.parse(payloadText),
-      statusText: "OK",
-    };
-  } catch (err) {
-    debugLog("all fetch methods failed", { url: baseUrl, finalError: err.message });
-    throw new Error(`All fetch methods failed. Last error: ${err.message}`);
-  }
 }
 
 async function applyBundleDir({ bundleDir, targetWorkspace }) {
@@ -175,9 +49,9 @@ async function installFromRemote({ serverUrl, agentSpec, targetWorkspace }) {
 
   debugLog("installing from remote", { serverUrl, slug, version: version || "latest", targetWorkspace, url: url.toString() });
 
-  let response;
+  let payload;
   try {
-    response = await fetchPayload(url);
+    payload = await fetchJsonWithFallback(url);
   } catch (error) {
     debugLog("remote install failed", { slug, error: error.message, cause: error.cause });
     // 提取更详细的错误信息
@@ -186,11 +60,6 @@ async function installFromRemote({ serverUrl, agentSpec, targetWorkspace }) {
     throw new Error(`Remote install failed: ${detailMsg}`);
   }
 
-  if (!response.ok) {
-    throw new Error(`Remote install failed: ${response.status} ${response.statusText}`);
-  }
-
-  const payload = await response.json();
   debugLog("payload received", { slug, size: JSON.stringify(payload).length });
   const bundleDir = await materializeBundlePayload(payload);
   return applyBundleDir({ bundleDir, targetWorkspace });

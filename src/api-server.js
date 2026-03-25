@@ -23,6 +23,30 @@ const RATE_LIMIT_MAX = parseInt(process.env.RATE_LIMIT_MAX || "100", 10); // 100
 
 // 简单的速率限制器
 const rateLimiter = new Map();
+let cleanupInterval = null;
+
+function startRateLimiterCleanup() {
+  if (cleanupInterval) return;
+  cleanupInterval = setInterval(() => {
+    const now = Date.now();
+    const windowStart = now - RATE_LIMIT_WINDOW;
+    for (const [ip, requests] of rateLimiter.entries()) {
+      const recentRequests = requests.filter(t => t > windowStart);
+      if (recentRequests.length === 0) {
+        rateLimiter.delete(ip);
+      } else if (recentRequests.length !== requests.length) {
+        rateLimiter.set(ip, recentRequests);
+      }
+    }
+  }, RATE_LIMIT_WINDOW);
+}
+
+function stopRateLimiterCleanup() {
+  if (cleanupInterval) {
+    clearInterval(cleanupInterval);
+    cleanupInterval = null;
+  }
+}
 
 function checkRateLimit(ip) {
   const now = Date.now();
@@ -203,6 +227,7 @@ export async function createApiServer({ registryDir, port = 3000 }) {
     }
   });
 
+  startRateLimiterCleanup();
   await new Promise((resolve) => server.listen(port, "0.0.0.0", resolve));
   const address = server.address();
   const actualPort = typeof address === "object" && address ? address.port : port;
@@ -211,6 +236,9 @@ export async function createApiServer({ registryDir, port = 3000 }) {
     server,
     port: actualPort,
     baseUrl: `http://127.0.0.1:${actualPort}`,
-    close: () => new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve()))),
+    close: () => new Promise((resolve, reject) => {
+      stopRateLimiterCleanup();
+      server.close((error) => (error ? reject(error) : resolve()));
+    }),
   };
 }

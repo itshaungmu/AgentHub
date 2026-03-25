@@ -28,7 +28,9 @@ import {
   formatVersionsOutput,
 } from "./index.js";
 
-const VERSION = "0.1.3";
+import { createRequire } from "node:module";
+const require = createRequire(import.meta.url);
+const VERSION = require("../package.json").version;
 
 function printHelp() {
   console.log(`

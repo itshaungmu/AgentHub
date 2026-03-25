@@ -4,17 +4,15 @@
  */
 
 import path from "node:path";
-import { pathExists, readJson, writeJson } from "../lib/fs-utils.js";
-import { installBundle } from "../lib/install.js";
+import { getCurrentVersion, performVersionChange } from "../lib/version-manager.js";
 import { versionsCommand } from "./versions.js";
 
 export async function updateCommand(agentSpec, options = {}) {
-  const registryDir = options.registry ? path.resolve(options.registry) : null;
   const targetWorkspace = options.targetWorkspace ? path.resolve(options.targetWorkspace) : null;
   const [slug] = agentSpec.split(":");
 
   // 获取可用版本
-  const versions = await versionsCommand(slug, registryDir ? { registry: registryDir } : options);
+  const versions = await versionsCommand(slug, options);
   if (versions.length === 0) {
     throw new Error(`Agent not found: ${slug}`);
   }
@@ -22,14 +20,7 @@ export async function updateCommand(agentSpec, options = {}) {
   const latestVersion = versions[0].version;
 
   // 获取当前安装版本
-  let currentVersion = null;
-  if (targetWorkspace) {
-    const installRecordPath = path.join(targetWorkspace, ".agenthub", "install.json");
-    if (await pathExists(installRecordPath)) {
-      const record = await readJson(installRecordPath);
-      currentVersion = record.version;
-    }
-  }
+  const currentVersion = await getCurrentVersion(targetWorkspace);
 
   if (currentVersion === latestVersion) {
     return {
@@ -41,27 +32,7 @@ export async function updateCommand(agentSpec, options = {}) {
   }
 
   // 执行更新
-  const installOptions = {
-    agentSpec: `${slug}:${latestVersion}`,
-    targetWorkspace,
-  };
-  if (registryDir) {
-    installOptions.registryDir = registryDir;
-  } else {
-    installOptions.serverUrl = options.server || "https://agenthub.cyou";
-  }
-  const result = await installBundle(installOptions);
-
-  // 记录更新
-  if (targetWorkspace) {
-    const installRecordPath = path.join(targetWorkspace, ".agenthub", "install.json");
-    await writeJson(installRecordPath, {
-      slug,
-      version: latestVersion,
-      updatedAt: new Date().toISOString(),
-      previousVersion: currentVersion,
-    });
-  }
+  const result = await performVersionChange(slug, latestVersion, currentVersion, targetWorkspace, options);
 
   return {
     updated: true,

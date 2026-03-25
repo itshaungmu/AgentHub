@@ -4,12 +4,11 @@
  */
 
 import path from "node:path";
-import { pathExists, readJson, writeJson } from "../lib/fs-utils.js";
+import { getCurrentVersion, updateInstallRecord, buildInstallOptions } from "../lib/version-manager.js";
 import { installBundle } from "../lib/install.js";
 import { versionsCommand } from "./versions.js";
 
 export async function rollbackCommand(agentSpec, options = {}) {
-  const registryDir = options.registry ? path.resolve(options.registry) : null;
   const targetWorkspace = options.targetWorkspace ? path.resolve(options.targetWorkspace) : null;
   const targetVersion = options.to;
 
@@ -20,44 +19,24 @@ export async function rollbackCommand(agentSpec, options = {}) {
   const [slug] = agentSpec.split(":");
 
   // 验证目标版本存在
-  const versions = await versionsCommand(slug, registryDir ? { registry: registryDir } : options);
+  const versions = await versionsCommand(slug, options);
   const versionExists = versions.some((v) => v.version === targetVersion);
   if (!versionExists) {
     throw new Error(`版本 ${targetVersion} 不存在`);
   }
 
   // 获取当前版本
-  let currentVersion = null;
-  if (targetWorkspace) {
-    const installRecordPath = path.join(targetWorkspace, ".agenthub", "install.json");
-    if (await pathExists(installRecordPath)) {
-      const record = await readJson(installRecordPath);
-      currentVersion = record.version;
-    }
-  }
+  const currentVersion = await getCurrentVersion(targetWorkspace);
 
   // 执行回滚
-  const installOptions = {
-    agentSpec: `${slug}:${targetVersion}`,
-    targetWorkspace,
-  };
-  if (registryDir) {
-    installOptions.registryDir = registryDir;
-  } else {
-    installOptions.serverUrl = options.server || "https://agenthub.cyou";
-  }
+  const installOptions = buildInstallOptions(slug, targetVersion, targetWorkspace, options);
   const result = await installBundle(installOptions);
 
   // 记录回滚
-  if (targetWorkspace) {
-    const installRecordPath = path.join(targetWorkspace, ".agenthub", "install.json");
-    await writeJson(installRecordPath, {
-      slug,
-      version: targetVersion,
-      rolledBackAt: new Date().toISOString(),
-      rolledBackFrom: currentVersion,
-    });
-  }
+  await updateInstallRecord(targetWorkspace, slug, targetVersion, {
+    rolledBackAt: new Date().toISOString(),
+    rolledBackFrom: currentVersion,
+  });
 
   return {
     rolledBack: true,

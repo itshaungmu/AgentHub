@@ -1,17 +1,14 @@
 import http from "node:http";
 import path from "node:path";
 import { readFile } from "node:fs/promises";
-import { sendHtml, sendJson, notFound } from "./lib/http.js";
+import { sendHtml, sendJson, notFound, fetchJsonWithFallback } from "./lib/http.js";
 import { renderAgentListPage, renderAgentDetailPage, renderStatsPage } from "./lib/html.js";
 
 const API_BASE = process.env.API_BASE || "http://127.0.0.1:3001";
 
-async function fetchApi(endpoint) {
-  const response = await fetch(`${API_BASE}${endpoint}`);
-  if (!response.ok) {
-    throw new Error(`API error: ${response.status}`);
-  }
-  return response.json();
+async function fetchApi(endpoint, apiBaseUrl) {
+  const url = `${apiBaseUrl}${endpoint}`;
+  return fetchJsonWithFallback(url);
 }
 
 export async function createWebServer({ port = 3000, apiBase = null }) {
@@ -44,8 +41,8 @@ export async function createWebServer({ port = 3000, apiBase = null }) {
       // 首页
       if (url.pathname === "/") {
         const query = url.searchParams.get("q") ?? "";
-        const data = await fetchApi(`/api/agents?q=${encodeURIComponent(query)}`);
-        const stats = await fetchApi("/api/stats");
+        const data = await fetchApi(`/api/agents?q=${encodeURIComponent(query)}`, apiBaseUrl);
+        const stats = await fetchApi("/api/stats", apiBaseUrl);
         sendHtml(response, 200, renderAgentListPage({
           query,
           agents: data.agents,
@@ -58,14 +55,14 @@ export async function createWebServer({ port = 3000, apiBase = null }) {
       // Agent 详情页
       if (url.pathname.startsWith("/agents/")) {
         const slug = url.pathname.slice("/agents/".length);
-        const manifest = await fetchApi(`/api/agents/${slug}`);
+        const manifest = await fetchApi(`/api/agents/${slug}`, apiBaseUrl);
         sendHtml(response, 200, renderAgentDetailPage({ ...manifest, apiBase: apiBaseUrl }));
         return;
       }
 
       // 统计页面
       if (url.pathname === "/stats") {
-        const stats = await fetchApi("/api/stats");
+        const stats = await fetchApi("/api/stats", apiBaseUrl);
         sendHtml(response, 200, renderStatsPage(stats));
         return;
       }

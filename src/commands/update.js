@@ -7,6 +7,7 @@ import path from "node:path";
 import { getCurrentVersion, performVersionChange } from "../lib/version-manager.js";
 import { parseSpec } from "../lib/registry.js";
 import { versionsCommand } from "./versions.js";
+import { success, warning, highlight, muted, symbols } from "../lib/colors.js";
 
 export async function updateCommand(agentSpec, options = {}) {
   const targetWorkspace = options.targetWorkspace ? path.resolve(options.targetWorkspace) : null;
@@ -26,7 +27,7 @@ export async function updateCommand(agentSpec, options = {}) {
   if (currentVersion === latestVersion) {
     return {
       updated: false,
-      message: `已是最新版本: ${latestVersion}`,
+      message: `${success(`${symbols.success} ${slug} 已是最新版本`)} ${muted(`(${latestVersion})`)}`,
       currentVersion,
       latestVersion,
     };
@@ -37,7 +38,15 @@ export async function updateCommand(agentSpec, options = {}) {
 
   return {
     updated: true,
-    message: `已更新 ${slug} 从 ${currentVersion || "未知"} 到 ${latestVersion}`,
+    message: [
+      success(`${symbols.success} 更新成功`),
+      "",
+      `  ${highlight("Agent:")} ${slug}`,
+      `  ${muted("旧版本:")} ${currentVersion || "未知"}`,
+      `  ${highlight("新版本:")} ${latestVersion}`,
+      "",
+      `  ${muted("运行")} ${highlight("agenthub verify " + slug)} ${muted("校验安装状态")}`,
+    ].join("\n"),
     currentVersion: latestVersion,
     previousVersion: currentVersion,
     manifest: result.manifest,

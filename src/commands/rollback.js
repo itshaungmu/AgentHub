@@ -8,6 +8,7 @@ import { getCurrentVersion, updateInstallRecord, buildInstallOptions } from "../
 import { installBundle } from "../lib/install.js";
 import { parseSpec } from "../lib/registry.js";
 import { versionsCommand } from "./versions.js";
+import { success, warning, highlight, muted, symbols } from "../lib/colors.js";
 
 export async function rollbackCommand(agentSpec, options = {}) {
   const targetWorkspace = options.targetWorkspace ? path.resolve(options.targetWorkspace) : null;
@@ -41,7 +42,16 @@ export async function rollbackCommand(agentSpec, options = {}) {
 
   return {
     rolledBack: true,
-    message: `已回滚 ${slug} 从 ${currentVersion || "未知"} 到 ${targetVersion}`,
+    message: [
+      success(`${symbols.success} 回滚成功`),
+      "",
+      `  ${highlight("Agent:")} ${slug}`,
+      `  ${muted("回滚前:")} ${currentVersion || "未知"}`,
+      `  ${highlight("当前版本:")} ${targetVersion}`,
+      "",
+      `  ${muted("运行")} ${highlight("agenthub verify " + slug)} ${muted("校验安装状态")}`,
+      `  ${muted("运行")} ${highlight("agenthub update " + slug)} ${muted("恢复到最新版本")}`,
+    ].join("\n"),
     currentVersion: targetVersion,
     previousVersion: currentVersion,
     manifest: result.manifest,

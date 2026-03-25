@@ -6,9 +6,10 @@
 import { pathExists, readJson } from "../lib/fs-utils.js";
 import path from "node:path";
 import { fetchRemoteJson } from "../lib/remote.js";
+import { parseSpec } from "../lib/registry.js";
 
 export async function versionsCommand(agentSpec, options = {}) {
-  const [slug] = agentSpec.split(":");
+  const { slug } = parseSpec(agentSpec);
 
   if (!options.registry) {
     const result = await fetchRemoteJson(`/api/agents?q=${encodeURIComponent(slug)}`, options);

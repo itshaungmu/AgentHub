@@ -6,22 +6,29 @@
 import { pathExists, readJson } from "../lib/fs-utils.js";
 import path from "node:path";
 import { fetchRemoteJson } from "../lib/remote.js";
-import { parseSpec } from "../lib/registry.js";
+import { parseSpec, compareVersionsDesc } from "../lib/registry.js";
+
+/**
+ * 将 agent 条目转换为版本信息
+ */
+function mapToVersionInfo(entries, slug) {
+  return entries
+    .filter((entry) => entry.slug === slug)
+    .map((entry) => ({
+      version: entry.version,
+      name: entry.name,
+      description: entry.description,
+      updatedAt: entry.updatedAt || entry.createdAt,
+    }))
+    .sort(compareVersionsDesc);
+}
 
 export async function versionsCommand(agentSpec, options = {}) {
   const { slug } = parseSpec(agentSpec);
 
   if (!options.registry) {
     const result = await fetchRemoteJson(`/api/agents?q=${encodeURIComponent(slug)}`, options);
-    return (result.agents || [])
-      .filter((entry) => entry.slug === slug)
-      .map((entry) => ({
-        version: entry.version,
-        name: entry.name,
-        description: entry.description,
-        updatedAt: entry.updatedAt || entry.createdAt,
-      }))
-      .sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }));
+    return mapToVersionInfo(result.agents || [], slug);
   }
 
   const registryDir = path.resolve(options.registry);
@@ -31,17 +38,7 @@ export async function versionsCommand(agentSpec, options = {}) {
   }
 
   const index = await readJson(indexPath);
-  const versions = index.agents
-    .filter((entry) => entry.slug === slug)
-    .map((entry) => ({
-      version: entry.version,
-      name: entry.name,
-      description: entry.description,
-      updatedAt: entry.updatedAt || entry.createdAt,
-    }))
-    .sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }));
-
-  return versions;
+  return mapToVersionInfo(index.agents, slug);
 }
 
 export function formatVersionsOutput(slug, versions, currentVersion = null) {

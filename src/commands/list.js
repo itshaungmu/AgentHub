@@ -4,20 +4,7 @@
  */
 
 import path from "node:path";
-import { stat, readdir, readFile } from "node:fs/promises";
-
-async function pathExists(targetPath) {
-  try {
-    await stat(targetPath);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-async function readJson(filePath) {
-  return JSON.parse(await readFile(filePath, "utf8"));
-}
+import { pathExists, readJson } from "../lib/fs-utils.js";
 
 export async function listCommand(options = {}) {
   // 检查多个可能的安装位置

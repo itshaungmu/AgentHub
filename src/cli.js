@@ -32,6 +32,21 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const VERSION = require("../package.json").version;
 
+/**
+ * 验证必需参数，如果缺失则打印错误并设置退出码
+ * @param {string} arg - 要验证的参数
+ * @param {string} message - 错误消息
+ * @returns {boolean} 参数是否存在
+ */
+function requireArg(arg, message) {
+  if (!arg) {
+    console.error(message);
+    process.exitCode = 1;
+    return false;
+  }
+  return true;
+}
+
 function printHelp() {
   console.log(`
 AgentHub v${VERSION} - AI Agent 打包与分发平台
@@ -309,22 +324,14 @@ async function main() {
       }
 
       case "publish": {
-        if (!rest[0]) {
-          console.error("错误: 需要指定 bundle 目录");
-          process.exitCode = 1;
-          return;
-        }
+        if (!requireArg(rest[0], "错误: 需要指定 bundle 目录")) return;
         const result = await publishCommand(rest[0], options);
         console.log(`✓ 已发布 ${result.slug}@${result.version}`);
         return;
       }
 
       case "publish-remote": {
-        if (!rest[0]) {
-          console.error("错误: 需要指定 bundle 目录");
-          process.exitCode = 1;
-          return;
-        }
+        if (!requireArg(rest[0], "错误: 需要指定 bundle 目录")) return;
         const result = await publishRemoteCommand(rest[0], options);
         console.log(`✓ 已发布到远程 ${result.slug}@${result.version}`);
         return;
@@ -344,11 +351,7 @@ async function main() {
       }
 
       case "info": {
-        if (!rest[0]) {
-          console.error("错误: 需要指定 agent slug");
-          process.exitCode = 1;
-          return;
-        }
+        if (!requireArg(rest[0], "错误: 需要指定 agent slug")) return;
         const result = await infoCommand(rest[0], options);
         console.log(`\n📦 ${result.name} (${result.slug}@${result.version})`);
         console.log(`   ${result.description}`);
@@ -362,11 +365,7 @@ async function main() {
       }
 
       case "install": {
-        if (!rest[0]) {
-          console.error("错误: 需要指定 agent slug");
-          process.exitCode = 1;
-          return;
-        }
+        if (!requireArg(rest[0], "错误: 需要指定 agent slug")) return;
         console.log(`\n📥 正在安装 ${rest[0]}...\n`);
         const installResult = await installCommand(rest[0], options);
         console.log(`✓ 已安装 ${installResult.manifest.slug}@${installResult.manifest.version}`);
@@ -390,44 +389,28 @@ async function main() {
       }
 
       case "versions": {
-        if (!rest[0]) {
-          console.error("错误: 需要指定 agent slug");
-          process.exitCode = 1;
-          return;
-        }
+        if (!requireArg(rest[0], "错误: 需要指定 agent slug")) return;
         const versions = await versionsCommand(rest[0], options);
         console.log(formatVersionsOutput(rest[0], versions));
         return;
       }
 
       case "update": {
-        if (!rest[0]) {
-          console.error("错误: 需要指定 agent slug");
-          process.exitCode = 1;
-          return;
-        }
+        if (!requireArg(rest[0], "错误: 需要指定 agent slug")) return;
         const updateResult = await updateCommand(rest[0], options);
         console.log(updateResult.message);
         return;
       }
 
       case "rollback": {
-        if (!rest[0]) {
-          console.error("错误: 需要指定 agent slug");
-          process.exitCode = 1;
-          return;
-        }
+        if (!requireArg(rest[0], "错误: 需要指定 agent slug")) return;
         const rollbackResult = await rollbackCommand(rest[0], options);
         console.log(rollbackResult.message);
         return;
       }
 
       case "stats": {
-        if (!rest[0]) {
-          console.error("错误: 需要指定 agent slug");
-          process.exitCode = 1;
-          return;
-        }
+        if (!requireArg(rest[0], "错误: 需要指定 agent slug")) return;
         const stats = await statsCommand(rest[0], options);
         console.log(formatStatsOutput(stats));
         return;

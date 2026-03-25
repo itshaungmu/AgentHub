@@ -67,7 +67,7 @@ test("list/verify/update/rollback commands work for local registry workflows", a
     targetWorkspace,
   ]);
   assert.equal(updateResult.status, 0);
-  assert.match(updateResult.stdout, /已更新|已是最新版本/);
+  assert.match(updateResult.stdout, /更新成功|已是最新版本/);
 
   const rollbackResult = runCli([
     "rollback",
@@ -80,7 +80,7 @@ test("list/verify/update/rollback commands work for local registry workflows", a
     targetWorkspace,
   ]);
   assert.equal(rollbackResult.status, 0);
-  assert.match(rollbackResult.stdout, /已回滚/);
+  assert.match(rollbackResult.stdout, /回滚成功/);
 
   const statsResult = runCli(["stats", "workspace", "--registry", registry]);
   assert.equal(statsResult.status, 0);

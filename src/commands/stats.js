@@ -6,7 +6,29 @@
 import path from "node:path";
 import { pathExists, readJson } from "../lib/fs-utils.js";
 import { fetchRemoteJson } from "../lib/remote.js";
-import { parseSpec } from "../lib/registry.js";
+import { parseSpec, getLatestVersion } from "../lib/registry.js";
+
+/**
+ * 构建统计返回对象的辅助函数
+ */
+function buildStatsResult(slug, manifest, agentEntries) {
+  const latestEntry = getLatestVersion(agentEntries);
+  return {
+    slug,
+    name: manifest.name,
+    latestVersion: latestEntry.version,
+    totalVersions: agentEntries.length,
+    description: manifest.description,
+    author: manifest.author,
+    runtime: manifest.runtime,
+    includes: manifest.includes,
+    requirements: manifest.requirements,
+    metadata: manifest.metadata,
+    downloads: manifest.downloads || 0,
+    stars: manifest.stats?.stars || 0,
+    rating: manifest.stats?.rating || null,
+  };
+}
 
 export async function statsCommand(agentSpec, options = {}) {
   const { slug } = parseSpec(agentSpec);
@@ -22,25 +44,7 @@ export async function statsCommand(agentSpec, options = {}) {
       throw new Error(`Agent not found: ${slug}`);
     }
 
-    const latestEntry = agentEntries.sort((a, b) =>
-      b.version.localeCompare(a.version, undefined, { numeric: true })
-    )[0];
-
-    return {
-      slug,
-      name: manifest.name,
-      latestVersion: latestEntry.version,
-      totalVersions: agentEntries.length,
-      description: manifest.description,
-      author: manifest.author,
-      runtime: manifest.runtime,
-      includes: manifest.includes,
-      requirements: manifest.requirements,
-      metadata: manifest.metadata,
-      downloads: manifest.downloads || 0,
-      stars: manifest.stats?.stars || 0,
-      rating: manifest.stats?.rating || null,
-    };
+    return buildStatsResult(slug, manifest, agentEntries);
   }
 
   const registryDir = path.resolve(options.registry);
@@ -56,10 +60,7 @@ export async function statsCommand(agentSpec, options = {}) {
     throw new Error(`Agent not found: ${slug}`);
   }
 
-  const latestEntry = agentEntries.sort((a, b) =>
-    b.version.localeCompare(a.version, undefined, { numeric: true })
-  )[0];
-
+  const latestEntry = getLatestVersion(agentEntries);
   const manifestPath = path.join(
     registryDir,
     "agents",
@@ -69,21 +70,7 @@ export async function statsCommand(agentSpec, options = {}) {
   );
   const manifest = await readJson(manifestPath);
 
-  return {
-    slug,
-    name: manifest.name,
-    latestVersion: latestEntry.version,
-    totalVersions: agentEntries.length,
-    description: manifest.description,
-    author: manifest.author,
-    runtime: manifest.runtime,
-    includes: manifest.includes,
-    requirements: manifest.requirements,
-    metadata: manifest.metadata,
-    downloads: manifest.stats?.installs || 0,
-    stars: manifest.stats?.stars || 0,
-    rating: manifest.stats?.rating || null,
-  };
+  return buildStatsResult(slug, manifest, agentEntries);
 }
 
 export function formatStatsOutput(stats) {

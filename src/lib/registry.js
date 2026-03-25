@@ -20,6 +20,22 @@ export function parseSpec(agentSpec) {
   return { slug, version: version || undefined };
 }
 
+/**
+ * 版本比较函数（用于排序）
+ * 按 semver 降序排列
+ */
+export function compareVersionsDesc(a, b) {
+  return b.version.localeCompare(a.version, undefined, { numeric: true });
+}
+
+/**
+ * 从 agent 条目中获取最新版本
+ */
+export function getLatestVersion(entries) {
+  if (!entries || entries.length === 0) return null;
+  return [...entries].sort(compareVersionsDesc)[0];
+}
+
 export async function publishBundle(bundleDir, registryDir) {
   const manifest = await readJson(path.join(bundleDir, "MANIFEST.json"));
   if (manifest.runtime?.type !== "openclaw") {

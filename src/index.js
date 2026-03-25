@@ -13,4 +13,4 @@ export { statsCommand, formatStatsOutput } from "./commands/stats.js";
 export { listCommand, formatListOutput } from "./commands/list.js";
 export { apiCommand } from "./commands/api.js";
 export { webCommand } from "./commands/web.js";
-export { parseSpec, compareVersionsDesc, getLatestVersion } from "./lib/registry.js";
+export { parseSpec, compareVersionsDesc, getLatestVersion, sortByDownloadsAndTime } from "./lib/registry.js";

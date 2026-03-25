@@ -36,6 +36,21 @@ export function getLatestVersion(entries) {
   return [...entries].sort(compareVersionsDesc)[0];
 }
 
+/**
+ * 按下载量和更新时间排序 Agent 列表
+ * 下载量降序，下载量一致时按更新时间降序
+ */
+export function sortByDownloadsAndTime(agents) {
+  return agents.sort((a, b) => {
+    if (b.downloads !== a.downloads) {
+      return b.downloads - a.downloads;
+    }
+    const timeA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+    const timeB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+    return timeB - timeA;
+  });
+}
+
 export async function publishBundle(bundleDir, registryDir) {
   const manifest = await readJson(path.join(bundleDir, "MANIFEST.json"));
   if (manifest.runtime?.type !== "openclaw") {

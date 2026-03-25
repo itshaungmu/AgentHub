@@ -6,7 +6,7 @@ import { copyDir, ensureDir, pathExists, readJson, writeJson } from "./fs-utils.
  * - 短名格式：slug 或 slug:version
  * - URI 格式：agenthub://owner/slug@version
  */
-function parseSpec(agentSpec) {
+export function parseSpec(agentSpec) {
   // URI 格式：agenthub://owner/slug@version
   if (agentSpec.startsWith("agenthub://")) {
     const uri = agentSpec.slice("agenthub://".length);

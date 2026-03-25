@@ -1,5 +1,5 @@
 import path from "node:path";
-import { readAgentInfo } from "../lib/registry.js";
+import { readAgentInfo, parseSpec } from "../lib/registry.js";
 import { fetchRemoteJson } from "../lib/remote.js";
 
 export async function infoCommand(agentSpec, options = {}) {
@@ -7,7 +7,7 @@ export async function infoCommand(agentSpec, options = {}) {
     return readAgentInfo(path.resolve(options.registry), agentSpec);
   }
 
-  const [slug, version] = agentSpec.split(":");
+  const { slug, version } = parseSpec(agentSpec);
   const params = new URLSearchParams();
   if (version) params.set("version", version);
   const qs = params.toString();

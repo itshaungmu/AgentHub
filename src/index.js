@@ -13,3 +13,4 @@ export { statsCommand, formatStatsOutput } from "./commands/stats.js";
 export { listCommand, formatListOutput } from "./commands/list.js";
 export { apiCommand } from "./commands/api.js";
 export { webCommand } from "./commands/web.js";
+export { parseSpec } from "./lib/registry.js";

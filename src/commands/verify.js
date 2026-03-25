@@ -1,5 +1,6 @@
 import path from "node:path";
 import { pathExists, readJson } from "../lib/fs-utils.js";
+import { parseSpec } from "../lib/registry.js";
 import { infoCommand } from "./info.js";
 
 export async function verifyCommand(agentSpec, options = {}) {
@@ -20,7 +21,7 @@ export async function verifyCommand(agentSpec, options = {}) {
   }
 
   const installRecord = await readJson(installRecordPath);
-  const expectedSlug = agentSpec ? agentSpec.split(":")[0] : installRecord.slug;
+  const expectedSlug = agentSpec ? parseSpec(agentSpec).slug : installRecord.slug;
   if (expectedSlug && installRecord.slug !== expectedSlug) {
     checks.push({
       name: "slug_match",

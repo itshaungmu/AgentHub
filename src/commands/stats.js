@@ -6,9 +6,10 @@
 import path from "node:path";
 import { pathExists, readJson } from "../lib/fs-utils.js";
 import { fetchRemoteJson } from "../lib/remote.js";
+import { parseSpec } from "../lib/registry.js";
 
 export async function statsCommand(agentSpec, options = {}) {
-  const [slug] = agentSpec.split(":");
+  const { slug } = parseSpec(agentSpec);
 
   if (!options.registry) {
     const [manifest, agentsResult] = await Promise.all([

@@ -5,11 +5,12 @@
 
 import path from "node:path";
 import { getCurrentVersion, performVersionChange } from "../lib/version-manager.js";
+import { parseSpec } from "../lib/registry.js";
 import { versionsCommand } from "./versions.js";
 
 export async function updateCommand(agentSpec, options = {}) {
   const targetWorkspace = options.targetWorkspace ? path.resolve(options.targetWorkspace) : null;
-  const [slug] = agentSpec.split(":");
+  const { slug } = parseSpec(agentSpec);
 
   // 获取可用版本
   const versions = await versionsCommand(slug, options);

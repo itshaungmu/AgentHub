@@ -6,6 +6,7 @@
 import path from "node:path";
 import { getCurrentVersion, updateInstallRecord, buildInstallOptions } from "../lib/version-manager.js";
 import { installBundle } from "../lib/install.js";
+import { parseSpec } from "../lib/registry.js";
 import { versionsCommand } from "./versions.js";
 
 export async function rollbackCommand(agentSpec, options = {}) {
@@ -16,7 +17,7 @@ export async function rollbackCommand(agentSpec, options = {}) {
     throw new Error("请指定回滚版本: --to <version>");
   }
 
-  const [slug] = agentSpec.split(":");
+  const { slug } = parseSpec(agentSpec);
 
   // 验证目标版本存在
   const versions = await versionsCommand(slug, options);

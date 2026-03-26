@@ -26,6 +26,7 @@ import {
   formatStatsOutput,
   versionsCommand,
   formatVersionsOutput,
+  doctorCommand,
 } from "./index.js";
 
 import { success, error, warning, info as infoColor, highlight, muted, symbols } from "./lib/colors.js";
@@ -69,6 +70,7 @@ AgentHub v${VERSION} - AI Agent 打包与分发平台
   update      更新已安装 Agent 到最新版
   rollback    回滚已安装 Agent 到指定版本
   stats       查看 Agent 统计信息
+  doctor      诊断 AgentHub 安装和环境问题
   serve       启动 Web + API 服务
 
 选项:
@@ -241,6 +243,22 @@ agenthub stats - 查看 Agent 统计信息
 
 示例:
   agenthub stats workspace --registry ./.registry
+`,
+    doctor: `
+agenthub doctor - 诊断 AgentHub 安装和环境问题
+
+用法:
+  agenthub doctor [options]
+
+选项:
+  --full      运行完整诊断（包括测试套件）
+  --no-network  跳过网络连接检查
+  --server <url>  指定服务器地址检查（默认: https://agenthub.cyou）
+
+示例:
+  agenthub doctor
+  agenthub doctor --full
+  agenthub doctor --no-network
 `,
     serve: `
 agenthub serve - 启动完整服务（前端+后端）
@@ -415,6 +433,14 @@ async function main() {
         if (!requireArg(rest[0], "错误: 需要指定 agent slug")) return;
         const stats = await statsCommand(rest[0], options);
         console.log(formatStatsOutput(stats));
+        return;
+      }
+
+      case "doctor": {
+        const result = await doctorCommand(options);
+        if (!result.healthy) {
+          process.exitCode = 1;
+        }
         return;
       }
 

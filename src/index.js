@@ -13,4 +13,5 @@ export { statsCommand, formatStatsOutput } from "./commands/stats.js";
 export { listCommand, formatListOutput } from "./commands/list.js";
 export { apiCommand } from "./commands/api.js";
 export { webCommand } from "./commands/web.js";
+export { doctorCommand } from "./commands/doctor.js";
 export { parseSpec, compareVersionsDesc, getLatestVersion, sortByDownloadsAndTime } from "./lib/registry.js";

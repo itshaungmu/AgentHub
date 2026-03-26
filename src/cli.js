@@ -259,6 +259,34 @@ agenthub rollback - 回滚 Agent 到指定版本
   agenthub rollback workspace --to 1.0.0 --registry ./.registry --target-workspace ./my-workspace
   agenthub rollback workspace --to 1.0.0 --server https://agenthub.cyou --target-workspace ./my-workspace
 `,
+    info: `
+agenthub info - 查看 Agent 详情
+
+用法:
+  agenthub info <agent-slug> [--registry <dir> | --server <url>]
+
+选项:
+  --registry <dir>          本地 Registry 目录（与 --server 二选一）
+  --server <url>            远程服务器地址（默认: https://agenthub.cyou）
+  --json                    JSON 格式输出
+
+示例:
+  agenthub info code-review-assistant --registry ./.registry
+  agenthub info my-agent --server https://agenthub.cyou --json
+`,
+    "publish-remote": `
+agenthub publish-remote - 发布 Agent 到远程服务器
+
+用法:
+  agenthub publish-remote <bundle-dir> --server <url>
+
+选项:
+  --server <url>    远程服务器地址（默认: https://agenthub.cyou）
+
+示例:
+  agenthub publish-remote ./bundles/my-agent.agent
+  agenthub publish-remote ./bundles/my-agent.agent --server https://agenthub.cyou
+`,
     stats: `
 agenthub stats - 查看 Agent 统计信息
 

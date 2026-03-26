@@ -1,0 +1,13 @@
+{
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "anthropic/claude-3-5-sonnet"
+      }
+    }
+  },
+  "runtime": {
+    "type": "openclaw",
+    "version": ">=0.5.0"
+  }
+}

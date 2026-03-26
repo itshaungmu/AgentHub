@@ -100,7 +100,7 @@ export async function packCommand(options) {
     openclawTemplate: template,
     skills: workspaceFiles.skills,
     prompts: workspaceFiles.prompts,
-    tags: options.tags ? options.tags.split(",").map((t) => t.trim()) : [],
+    tags: options.tags && typeof options.tags === "string" && options.tags.trim() ? options.tags.split(",").map((t) => t.trim()) : [],
     category: options.category,
     version,
     featured: options.featured === true,

@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.7] - 2026-03-26
+
+### Testing
+- **Query Commands Tests**: Added comprehensive test coverage for search, info, stats, versions
+  - search command lists agents from local registry
+  - search command filters by query
+  - info command shows agent details
+  - stats command shows agent statistics
+  - versions command lists available versions
+  - query commands show help
+  - stats command fails for non-existent agent
+- Test count increased from 18 to 25 (100% pass rate)
+
+### Quality Improvements
+- All CLI query commands now have dedicated test coverage
+- Improved test isolation and cleanup
+
 ## [0.3.6] - 2026-03-26
 
 ### Testing
@@ -258,6 +275,9 @@ Product is ready for external promotion
 - CONTRIBUTING guide
 - MIT License
 
+[0.3.7]: https://github.com/itshaungmu/AgentHub/compare/v0.3.6...v0.3.7
+[0.3.6]: https://github.com/itshaungmu/AgentHub/compare/v0.3.5...v0.3.6
+[0.3.5]: https://github.com/itshaungmu/AgentHub/compare/v0.3.4...v0.3.5
 [0.3.4]: https://github.com/itshaungmu/AgentHub/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/itshaungmu/AgentHub/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/itshaungmu/AgentHub/compare/v0.3.1...v0.3.2

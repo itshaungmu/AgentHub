@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2026-03-25
+
+### Added
+- **Official Sample Agent**: Added `code-review-assistant` sample agent in `/samples` directory
+- **Sample Agent Tutorial**: New "试用样板 Agent" section in README for quick onboarding
+
+### Documentation
+- Complete quick start tutorial with step-by-step sample agent workflow
+- Sample agent includes AGENTS.md, SOUL.md, USER.md, IDENTITY.md, TOOLS.md
+
 ## [0.2.1] - 2026-03-25
 
 ### Changed
@@ -101,6 +111,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CONTRIBUTING guide
 - MIT License
 
+[0.2.2]: https://github.com/itshaungmu/AgentHub/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/itshaungmu/AgentHub/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/itshaungmu/AgentHub/compare/v0.1.8...v0.2.0
 [0.1.8]: https://github.com/itshaungmu/AgentHub/compare/v0.1.7...v0.1.8

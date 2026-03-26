@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.12] - 2026-03-26
+
+### Added
+- **Host Option for Servers**: `--host` option for serve, api, and web commands
+  - Specify which network interface to bind (default: 0.0.0.0)
+  - Useful for binding to localhost only (127.0.0.1) for security
+  - Example: `agenthub serve --registry ./.registry --host 127.0.0.1`
+
+### Documentation
+- **API Command Help**: Added help text for `agenthub api` command
+- **Web Command Help**: Added help text for `agenthub web` command
+- Updated serve command help to include --host option
+
 ## [0.4.11] - 2026-03-26
 
 ### Fixed
@@ -439,6 +452,7 @@ Product is ready for external promotion
 - CONTRIBUTING guide
 - MIT License
 
+[0.4.12]: https://github.com/itshaungmu/AgentHub/compare/v0.4.11...v0.4.12
 [0.4.11]: https://github.com/itshaungmu/AgentHub/compare/v0.4.10...v0.4.11
 [0.4.10]: https://github.com/itshaungmu/AgentHub/compare/v0.4.9...v0.4.10
 [0.4.9]: https://github.com/itshaungmu/AgentHub/compare/v0.4.8...v0.4.9

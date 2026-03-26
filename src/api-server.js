@@ -66,7 +66,7 @@ function isValidSlug(slug) {
   return /^[a-z0-9-]+$/.test(slug) && slug.length <= 100;
 }
 
-export async function createApiServer({ registryDir, port = 3000 }) {
+export async function createApiServer({ registryDir, port = 3000, host = "0.0.0.0" }) {
   // 初始化数据库
   await initDatabase(registryDir);
 
@@ -228,7 +228,7 @@ export async function createApiServer({ registryDir, port = 3000 }) {
   });
 
   startRateLimiterCleanup();
-  await new Promise((resolve) => server.listen(port, "0.0.0.0", resolve));
+  await new Promise((resolve) => server.listen(port, host, resolve));
   const address = server.address();
   const actualPort = typeof address === "object" && address ? address.port : port;
 

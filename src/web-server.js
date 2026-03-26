@@ -11,7 +11,7 @@ async function fetchApi(endpoint, apiBaseUrl) {
   return fetchJsonWithFallback(url);
 }
 
-export async function createWebServer({ port = 3000, apiBase = null }) {
+export async function createWebServer({ port = 3000, apiBase = null, host = "0.0.0.0" }) {
   const apiBaseUrl = apiBase || API_BASE;
 
   const server = http.createServer(async (request, response) => {
@@ -81,7 +81,7 @@ export async function createWebServer({ port = 3000, apiBase = null }) {
     }
   });
 
-  await new Promise((resolve) => server.listen(port, "0.0.0.0", resolve));
+  await new Promise((resolve) => server.listen(port, host, resolve));
   const address = server.address();
   const actualPort = typeof address === "object" && address ? address.port : port;
 

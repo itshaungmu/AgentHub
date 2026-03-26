@@ -297,9 +297,39 @@ agenthub serve - 启动完整服务（前端+后端）
   --registry <dir>    Registry 目录 (必需)
   --port <port>       前端端口号 (默认: 3000)
   --api-port <port>   后端 API 端口号 (默认: 3001)
+  --host <host>       监听地址 (默认: 0.0.0.0)
 
 示例:
   agenthub serve --registry ./.registry --port 3000
+  agenthub serve --registry ./.registry --host 127.0.0.1
+`,
+    api: `
+agenthub api - 仅启动 API 后端服务
+
+用法:
+  agenthub api --registry <dir> --port <port>
+
+选项:
+  --registry <dir>    Registry 目录 (必需)
+  --port <port>       API 端口号 (默认: 3001)
+  --host <host>       监听地址 (默认: 0.0.0.0)
+
+示例:
+  agenthub api --registry ./.registry --port 3001
+`,
+    web: `
+agenthub web - 仅启动 Web 前端服务
+
+用法:
+  agenthub web --port <port> --api-base <url>
+
+选项:
+  --port <port>       Web 端口号 (默认: 3000)
+  --api-base <url>    API 服务地址 (默认: http://127.0.0.1:3001)
+  --host <host>       监听地址 (默认: 0.0.0.0)
+
+示例:
+  agenthub web --port 3000 --api-base http://127.0.0.1:3001
 `,
   };
 
@@ -537,7 +567,8 @@ async function main() {
       case "web": {
         const port = options.port || "3000";
         const apiBase = options.apiBase || "http://127.0.0.1:3001";
-        const result = await webCommand({ port, apiBase });
+        const host = options.host || "0.0.0.0";
+        const result = await webCommand({ port, apiBase, host });
         console.log(success(`Server listening at ${result.baseUrl}`));
         console.log(`\n${highlight("🌐 Web 服务已启动")}`);
         console.log(`   ${muted("地址:")} ${result.baseUrl}`);

@@ -489,6 +489,26 @@ async function main() {
     const causeMsg = err.cause?.errors?.[0]?.message || err.cause?.message || "";
     const detailMsg = causeMsg ? `${err.message}\n   原因: ${causeMsg}` : err.message;
     console.error(`\n${error(`${symbols.error} 错误:`)} ${detailMsg}`);
+
+    // 提供友好的解决建议
+    const errMsg = err.message.toLowerCase();
+    if (errMsg.includes("not found") || errMsg.includes("does not exist") || errMsg.includes("enoent")) {
+      console.log(`\n${warning("建议:")}`);
+      console.log(`  - 检查文件路径是否正确`);
+      console.log(`  - 确认 workspace 目录存在`);
+      console.log(`  - 运行 ${highlight("agenthub --help")} 查看命令用法`);
+    } else if (errMsg.includes("permission") || errMsg.includes("eacces")) {
+      console.log(`\n${warning("建议:")}`);
+      console.log(`  - 检查文件权限`);
+      console.log(`  - 尝试使用 ${highlight("sudo")} 命令`);
+    } else if (errMsg.includes("network") || errMsg.includes("econnrefused") || errMsg.includes("timeout")) {
+      console.log(`\n${warning("建议:")}`);
+      console.log(`  - 检查网络连接`);
+      console.log(`  - 确认服务器地址正确`);
+      console.log(`  - 使用 ${highlight("--registry")} 指定本地 registry`);
+    }
+
+    console.log(`\n${muted("如需更多帮助，运行: agenthub <command> --help")}`);
     process.exitCode = 1;
   }
 }

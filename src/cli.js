@@ -111,6 +111,7 @@ agenthub pack - 打包 Agent
   --workspace <dir>   OpenClaw 工作区目录 (必需)
   --config <file>     openclaw.json 配置文件路径 (必需)
   --output <dir>      输出目录 (默认: ./bundles)
+  --name <name>       Agent 名称 (默认: 工作区目录名)
   --version <ver>     版本号 (默认: 1.0.0)
   --tags <tags>       标签，逗号分隔
   --category <cat>    分类
@@ -118,6 +119,7 @@ agenthub pack - 打包 Agent
 示例:
   agenthub pack --workspace ./my-agent --config ./openclaw.json
   agenthub pack --workspace ./my-agent --config ./openclaw.json --version 2.0.0
+  agenthub pack --workspace ./my-agent --config ./openclaw.json --name "Code Helper"
 `,
     publish: `
 agenthub publish - 发布 Agent

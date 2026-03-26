@@ -207,3 +207,36 @@ test("pack command supports custom version", async () => {
   const manifest = await readJson(path.join(bundlePath, "MANIFEST.json"));
   assert.equal(manifest.version, "2.5.0");
 });
+
+test("pack command supports custom name", async () => {
+  const temp = await createTempDir("agenthub-pack-name-");
+  const workspace = path.join(temp, "workspace");
+  const output = path.join(temp, "output");
+  const configPath = path.join(temp, "openclaw.json");
+
+  await setupWorkspace(workspace);
+  await writeJson(configPath, {
+    agents: { defaults: { model: { primary: "anthropic/claude-3-5-sonnet" } } },
+  });
+
+  // Pack with custom name
+  const result = runCli([
+    "pack",
+    "--workspace", workspace,
+    "--config", configPath,
+    "--output", output,
+    "--name", "My Custom Agent"
+  ]);
+
+  assert.equal(result.status, 0);
+
+  // Verify the bundle directory uses the custom name (slugified)
+  const bundlePath = path.join(output, "my-custom-agent-1.0.0.agent");
+  const stat = await import("node:fs/promises").then(fs => fs.stat(bundlePath));
+  assert.ok(stat.isDirectory(), "Bundle directory should exist with custom name");
+
+  // Verify the manifest contains the custom name
+  const manifest = await readJson(path.join(bundlePath, "MANIFEST.json"));
+  assert.equal(manifest.name, "My Custom Agent");
+  assert.equal(manifest.slug, "my-custom-agent");
+});

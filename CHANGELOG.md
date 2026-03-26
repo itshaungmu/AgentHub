@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-03-26
+
+### Added
+- **Pack Name Option**: `--name` option for pack command to specify custom agent name
+  - Allows setting a friendly name different from directory name
+  - Automatically generates slug from the name
+  - Example: `agenthub pack --name "Code Helper"`
+
+### Testing
+- **Name Option Test**: Added test for custom name in pack command
+- Test count increased from 26 to 27 (100% pass rate)
+
 ## [0.4.0] - 2026-03-26
 
 ### Documentation
@@ -311,6 +323,7 @@ Product is ready for external promotion
 - CONTRIBUTING guide
 - MIT License
 
+[0.4.1]: https://github.com/itshaungmu/AgentHub/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/itshaungmu/AgentHub/compare/v0.3.9...v0.4.0
 [0.3.9]: https://github.com/itshaungmu/AgentHub/compare/v0.3.8...v0.3.9
 [0.3.8]: https://github.com/itshaungmu/AgentHub/compare/v0.3.7...v0.3.8

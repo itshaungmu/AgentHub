@@ -68,9 +68,11 @@ export async function packCommand(options) {
   const output = path.resolve(options.output ?? "./bundles");
   const configPath = options.config ? path.resolve(options.config) : null;
   const version = options.version || "1.0.0";
+  const customName = options.name || null;
 
-  // 从工作区名称生成 slug
-  const slug = path.basename(workspace).toLowerCase().replace(/[^a-z0-9-]/g, "-");
+  // 从工作区名称或自定义名称生成 slug
+  const baseName = customName || path.basename(workspace);
+  const slug = baseName.toLowerCase().replace(/[^a-z0-9-]/g, "-");
   const bundleDir = path.join(output, `${slug}-${version}.agent`);
 
   // 1. 扫描工作区
@@ -93,7 +95,7 @@ export async function packCommand(options) {
   // 4. 生成 MANIFEST
   const manifest = createManifest({
     slug,
-    name: path.basename(workspace),
+    name: customName || path.basename(workspace),
     memoryCounts,
     openclawTemplate: template,
     skills: workspaceFiles.skills,

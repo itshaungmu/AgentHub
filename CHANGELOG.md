@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.10] - 2026-03-26
+
+### Documentation
+- **README Updates**: Added uninstall command to CLI commands table
+- **README_CN Updates**: Added uninstall, verify, doctor commands to command list
+- Improved documentation completeness for all lifecycle commands
+
 ## [0.4.9] - 2026-03-26
 
 ### Added
@@ -427,6 +434,7 @@ Product is ready for external promotion
 - CONTRIBUTING guide
 - MIT License
 
+[0.4.10]: https://github.com/itshaungmu/AgentHub/compare/v0.4.9...v0.4.10
 [0.4.9]: https://github.com/itshaungmu/AgentHub/compare/v0.4.8...v0.4.9
 [0.4.8]: https://github.com/itshaungmu/AgentHub/compare/v0.4.7...v0.4.8
 [0.4.7]: https://github.com/itshaungmu/AgentHub/compare/v0.4.6...v0.4.7

@@ -148,6 +148,7 @@ agenthub verify code-review-assistant --registry ./.registry --target-workspace 
 | `info` | 查看 Agent 详情 |
 | `install` | 安装 Agent 到 workspace |
 | `list` | 列出已安装的 Agent |
+| `uninstall` | 卸载已安装的 Agent |
 | `verify` | 校验已安装 Agent 是否完整 |
 | `versions` | 查看 Agent 版本历史 |
 | `update` | 更新 Agent 到最新版 |

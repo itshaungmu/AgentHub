@@ -175,3 +175,35 @@ test("stats command fails for non-existent agent", async () => {
   const result = runCli(["stats", "nonexistent-agent", "--registry", registry]);
   assert.notEqual(result.status, 0);
 });
+
+test("pack command supports custom version", async () => {
+  const temp = await createTempDir("agenthub-pack-version-");
+  const workspace = path.join(temp, "workspace");
+  const output = path.join(temp, "output");
+  const configPath = path.join(temp, "openclaw.json");
+
+  await setupWorkspace(workspace);
+  await writeJson(configPath, {
+    agents: { defaults: { model: { primary: "anthropic/claude-3-5-sonnet" } } },
+  });
+
+  // Pack with custom version
+  const result = runCli([
+    "pack",
+    "--workspace", workspace,
+    "--config", configPath,
+    "--output", output,
+    "--version", "2.5.0"
+  ]);
+
+  assert.equal(result.status, 0);
+
+  // Verify the bundle directory uses the custom version
+  const bundlePath = path.join(output, "workspace-2.5.0.agent");
+  const stat = await import("node:fs/promises").then(fs => fs.stat(bundlePath));
+  assert.ok(stat.isDirectory(), "Bundle directory should exist with custom version");
+
+  // Verify the manifest contains the custom version
+  const manifest = await readJson(path.join(bundlePath, "MANIFEST.json"));
+  assert.equal(manifest.version, "2.5.0");
+});

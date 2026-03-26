@@ -111,11 +111,13 @@ agenthub pack - 打包 Agent
   --workspace <dir>   OpenClaw 工作区目录 (必需)
   --config <file>     openclaw.json 配置文件路径 (必需)
   --output <dir>      输出目录 (默认: ./bundles)
+  --version <ver>     版本号 (默认: 1.0.0)
   --tags <tags>       标签，逗号分隔
   --category <cat>    分类
 
 示例:
   agenthub pack --workspace ./my-agent --config ./openclaw.json
+  agenthub pack --workspace ./my-agent --config ./openclaw.json --version 2.0.0
 `,
     publish: `
 agenthub publish - 发布 Agent
@@ -284,11 +286,7 @@ function parseArgs(argv) {
   const options = {};
   for (let index = 0; index < argv.length; index += 1) {
     const token = argv[index];
-    if (token === "--help" || token === "-h") {
-      options.help = true;
-    } else if (token === "--version" || token === "-v") {
-      options.version = true;
-    } else if (token.startsWith("--")) {
+    if (token.startsWith("--")) {
       const rawKey = token.slice(2);
       const camelKey = rawKey.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
       const value = argv[index + 1];
@@ -300,6 +298,10 @@ function parseArgs(argv) {
         options[rawKey] = true;
         options[camelKey] = true;
       }
+    } else if (token === "-h") {
+      options.help = true;
+    } else if (token === "-v") {
+      options.version = true;
     } else {
       positionals.push(token);
     }
@@ -311,8 +313,8 @@ async function main() {
   const { positionals, options } = parseArgs(process.argv.slice(2));
   const [command, ...rest] = positionals;
 
-  // 全局选项
-  if (options.version) {
+  // 全局选项 - only show version if --version/-v is a boolean flag, not a string value
+  if (options.version === true) {
     console.log(`AgentHub v${VERSION}`);
     return;
   }

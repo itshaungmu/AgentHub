@@ -67,10 +67,11 @@ export async function packCommand(options) {
   const workspace = path.resolve(options.workspace || process.cwd());
   const output = path.resolve(options.output ?? "./bundles");
   const configPath = options.config ? path.resolve(options.config) : null;
+  const version = options.version || "1.0.0";
 
   // 从工作区名称生成 slug
   const slug = path.basename(workspace).toLowerCase().replace(/[^a-z0-9-]/g, "-");
-  const bundleDir = path.join(output, `${slug}-1.0.0.agent`);
+  const bundleDir = path.join(output, `${slug}-${version}.agent`);
 
   // 1. 扫描工作区
   const workspaceFiles = await scanWorkspace(workspace);
@@ -99,6 +100,7 @@ export async function packCommand(options) {
     prompts: workspaceFiles.prompts,
     tags: options.tags ? options.tags.split(",").map((t) => t.trim()) : [],
     category: options.category,
+    version,
   });
 
   // 5. 验证 MANIFEST

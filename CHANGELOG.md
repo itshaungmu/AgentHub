@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.9] - 2026-03-26
+
+### Added
+- **Pack Version Option**: `--version` option for pack command to specify bundle version
+  - Now supports custom versioning: `agenthub pack --version 2.5.0`
+  - Default version remains 1.0.0 if not specified
+
+### Testing
+- **Version Option Test**: Added test for custom version in pack command
+- Test count increased from 25 to 26 (100% pass rate)
+
 ## [0.3.8] - 2026-03-26
 
 ### UX Improvements
@@ -288,6 +299,7 @@ Product is ready for external promotion
 - CONTRIBUTING guide
 - MIT License
 
+[0.3.9]: https://github.com/itshaungmu/AgentHub/compare/v0.3.8...v0.3.9
 [0.3.8]: https://github.com/itshaungmu/AgentHub/compare/v0.3.7...v0.3.8
 [0.3.7]: https://github.com/itshaungmu/AgentHub/compare/v0.3.6...v0.3.7
 [0.3.6]: https://github.com/itshaungmu/AgentHub/compare/v0.3.5...v0.3.6

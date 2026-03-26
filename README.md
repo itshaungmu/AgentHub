@@ -161,6 +161,9 @@ agenthub verify code-review-assistant --registry ./.registry --target-workspace 
 ### HTTP API
 
 ```bash
+# 健康检查
+curl http://localhost:3001/api/health
+
 # 列出所有 Agent
 curl http://localhost:3001/api/agents
 
@@ -170,8 +173,20 @@ curl "http://localhost:3001/api/agents?q=react"
 # 获取 Agent 详情
 curl http://localhost:3001/api/agents/my-agent
 
+# 下载 Agent Bundle
+curl http://localhost:3001/api/agents/my-agent/download
+
 # 获取统计信息
 curl http://localhost:3001/api/stats
+
+# 获取下载排行
+curl "http://localhost:3001/api/stats/ranking?limit=10"
+
+# 发布 Agent (POST)
+curl -X POST http://localhost:3001/api/publish -H "Content-Type: application/json" -d '{"slug":"my-agent","version":"1.0.0"}'
+
+# 上传发布 Agent (POST)
+curl -X POST http://localhost:3001/api/publish-upload -H "Content-Type: application/json" -d '{"bundleData":"..."}'
 ```
 
 ### AI 自动发现

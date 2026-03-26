@@ -1,6 +1,6 @@
 {
   "name": "@zshuangmu/agenthub",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "AI Agent 打包与分发平台 - 一句话打包上传，一键下载获得能力",
   "type": "module",
   "main": "src/index.js",

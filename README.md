@@ -184,6 +184,7 @@ curl http://localhost:3001/api/skills/agenthub-discover
 |------|------|
 | [3 步复刻 Agent](./docs/quick-start-3-steps.md) | 10 分钟快速上手指南 |
 | [团队分发指南](./docs/team-distribution-guide.md) | 如何把团队 Agent 标准化分发 |
+| [常见问题 FAQ](./docs/faq.md) | 常见问题解答 |
 
 ## 🏗️ 架构
 

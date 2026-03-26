@@ -216,6 +216,29 @@ agenthub versions <agent> --registry ./.registry
 agenthub list --target-workspace ./workspace
 ```
 
+### 如何诊断安装问题？
+
+运行诊断命令检查你的环境：
+
+```bash
+# 基本诊断
+agenthub doctor
+
+# 跳过网络检查
+agenthub doctor --no-network
+
+# 完整诊断（包括测试套件）
+agenthub doctor --full
+```
+
+诊断会检查：
+- Node.js 版本兼容性
+- AgentHub 包安装完整性
+- CLI 可执行文件
+- 样板 Agent 可用性
+- 文档完整性
+- 网络连接状态
+
 ---
 
 ## 📚 更多帮助

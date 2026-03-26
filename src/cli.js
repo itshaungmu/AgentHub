@@ -527,14 +527,32 @@ async function main() {
       console.log(`\n${warning("建议:")}`);
       console.log(`  - 检查文件权限`);
       console.log(`  - 尝试使用 ${highlight("sudo")} 命令`);
-    } else if (errMsg.includes("network") || errMsg.includes("econnrefused") || errMsg.includes("timeout")) {
+    } else if (errMsg.includes("network") || errMsg.includes("econnrefused") || errMsg.includes("timeout") || errMsg.includes("fetch failed")) {
       console.log(`\n${warning("建议:")}`);
       console.log(`  - 检查网络连接`);
       console.log(`  - 确认服务器地址正确`);
       console.log(`  - 使用 ${highlight("--registry")} 指定本地 registry`);
+      console.log(`  - 运行 ${highlight("agenthub doctor")} 诊断环境问题`);
+    } else if (errMsg.includes("agent not found") || errMsg.includes("no agent")) {
+      console.log(`\n${warning("建议:")}`);
+      console.log(`  - 运行 ${highlight("agenthub search")} 查看可用 Agent`);
+      console.log(`  - 检查 Agent 名称拼写`);
+      console.log(`  - 确认使用正确的 --registry 路径`);
+    } else if (errMsg.includes("invalid") || errMsg.includes("validation")) {
+      console.log(`\n${warning("建议:")}`);
+      console.log(`  - 检查配置文件格式 (openclaw.json)`);
+      console.log(`  - 确认 workspace 包含必需文件 (AGENTS.md, SOUL.md 等)`);
+      console.log(`  - 运行 ${highlight("agenthub verify")} 检查安装完整性`);
+    } else if (errMsg.includes("version") || errMsg.includes("already")) {
+      console.log(`\n${warning("建议:")}`);
+      console.log(`  - 运行 ${highlight("agenthub versions <agent>")} 查看可用版本`);
+      console.log(`  - 使用 ${highlight("--force")} 强制覆盖安装`);
+      console.log(`  - 运行 ${highlight("agenthub list")} 查看已安装的 Agent`);
     }
 
-    console.log(`\n${muted("如需更多帮助，运行: agenthub <command> --help")}`);
+    console.log(`\n${muted("如需更多帮助:")}`);
+    console.log(`${muted("  - 运行: agenthub <command> --help")}`);
+    console.log(`${muted("  - 诊断: agenthub doctor")}`);
     process.exitCode = 1;
   }
 }

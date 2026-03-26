@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.8] - 2026-03-26
+
+### UX Improvements
+- **Enhanced Error Suggestions**: More comprehensive error detection and actionable advice
+  - Added suggestions for "agent not found" errors
+  - Added suggestions for "validation" errors
+  - Added suggestions for "version" errors
+  - Added doctor command recommendation for troubleshooting
+- **FAQ Enhancement**: Added doctor command troubleshooting section
+
+### Documentation
+- Updated docs/faq.md with doctor command usage and scenarios
+
 ## [0.3.7] - 2026-03-26
 
 ### Testing
@@ -275,6 +288,7 @@ Product is ready for external promotion
 - CONTRIBUTING guide
 - MIT License
 
+[0.3.8]: https://github.com/itshaungmu/AgentHub/compare/v0.3.7...v0.3.8
 [0.3.7]: https://github.com/itshaungmu/AgentHub/compare/v0.3.6...v0.3.7
 [0.3.6]: https://github.com/itshaungmu/AgentHub/compare/v0.3.5...v0.3.6
 [0.3.5]: https://github.com/itshaungmu/AgentHub/compare/v0.3.4...v0.3.5

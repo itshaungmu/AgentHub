@@ -4,6 +4,7 @@ export { publishRemoteCommand } from "./commands/publish-remote.js";
 export { searchCommand } from "./commands/search.js";
 export { infoCommand } from "./commands/info.js";
 export { installCommand } from "./commands/install.js";
+export { uninstallCommand } from "./commands/uninstall.js";
 export { verifyCommand, formatVerifyOutput } from "./commands/verify.js";
 export { serveCommand } from "./commands/serve.js";
 export { versionsCommand, formatVersionsOutput } from "./commands/versions.js";

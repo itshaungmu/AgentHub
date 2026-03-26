@@ -30,6 +30,7 @@ import {
 } from "./index.js";
 
 import { success, error, warning, info as infoColor, highlight, muted, symbols } from "./lib/colors.js";
+import { setVerbose, debug } from "./lib/debug.js";
 
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
@@ -76,6 +77,7 @@ AgentHub v${VERSION} - AI Agent 打包与分发平台
 选项:
   --help, -h      显示帮助信息
   --version, -v   显示版本号
+  --verbose       显示详细日志信息
 
 详细帮助:
   agenthub <command> --help
@@ -320,6 +322,12 @@ function parseArgs(argv) {
 async function main() {
   const { positionals, options } = parseArgs(process.argv.slice(2));
   const [command, ...rest] = positionals;
+
+  // 设置 verbose 模式
+  if (options.verbose) {
+    setVerbose(true);
+    debug("Verbose mode enabled");
+  }
 
   // 全局选项 - only show version if --version/-v is a boolean flag, not a string value
   if (options.version === true) {

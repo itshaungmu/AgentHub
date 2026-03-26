@@ -3,7 +3,27 @@
  * 性能日志工具，用于调试和性能分析
  */
 
-const DEBUG = process.env.AGENTHUB_DEBUG === "true" || process.env.AGENTHUB_DEBUG === "1";
+let verboseMode = false;
+
+/**
+ * 设置 verbose 模式
+ * @param {boolean} enabled - 是否启用
+ */
+export function setVerbose(enabled) {
+  verboseMode = enabled;
+  if (enabled) {
+    process.env.AGENTHUB_DEBUG = "true";
+  }
+}
+
+/**
+ * 获取是否处于 debug 模式
+ */
+export function isDebug() {
+  return verboseMode || process.env.AGENTHUB_DEBUG === "true" || process.env.AGENTHUB_DEBUG === "1";
+}
+
+const DEBUG = isDebug();
 
 /**
  * 计时器存储

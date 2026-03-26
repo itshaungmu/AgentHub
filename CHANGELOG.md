@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-03-26
+
+### Documentation
+- **README Updates**: Updated CLI command documentation
+  - Added `doctor` command to command list
+  - Added `--version` option example for pack command
+  - Improved pack command description
+
+### Improvements
+- Better documentation alignment with actual CLI capabilities
+- Clearer versioning workflow examples
+
 ## [0.3.9] - 2026-03-26
 
 ### Added
@@ -299,6 +311,7 @@ Product is ready for external promotion
 - CONTRIBUTING guide
 - MIT License
 
+[0.4.0]: https://github.com/itshaungmu/AgentHub/compare/v0.3.9...v0.4.0
 [0.3.9]: https://github.com/itshaungmu/AgentHub/compare/v0.3.8...v0.3.9
 [0.3.8]: https://github.com/itshaungmu/AgentHub/compare/v0.3.7...v0.3.8
 [0.3.7]: https://github.com/itshaungmu/AgentHub/compare/v0.3.6...v0.3.7

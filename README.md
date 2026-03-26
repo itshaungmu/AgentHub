@@ -92,6 +92,9 @@ cd AgentHub && npm install && npm link
 # 1. 打包你的 OpenClaw workspace
 agenthub pack --workspace ./my-workspace --config openclaw.json
 
+# 或指定版本号
+agenthub pack --workspace ./my-workspace --config openclaw.json --version 2.0.0
+
 # 2. 发布到 Registry
 agenthub publish ./bundles/my-agent.agent --registry ./.registry
 ```
@@ -138,7 +141,7 @@ agenthub verify code-review-assistant --registry ./.registry --target-workspace 
 
 | 命令 | 描述 |
 |------|------|
-| `pack` | 打包 workspace 为 Agent Bundle |
+| `pack` | 打包 workspace 为 Agent Bundle（支持 `--version` 指定版本） |
 | `publish` | 发布到本地 Registry |
 | `publish-remote` | 发布到远程服务器 |
 | `search` | 搜索 Registry 中的 Agent |
@@ -150,6 +153,7 @@ agenthub verify code-review-assistant --registry ./.registry --target-workspace 
 | `update` | 更新 Agent 到最新版 |
 | `rollback` | 回滚 Agent 到指定版本 |
 | `stats` | 查看 Agent 统计信息 |
+| `doctor` | 诊断 AgentHub 安装和环境问题 |
 | `serve` | 启动 Web + API 服务 |
 | `api` | 仅启动 API 服务 |
 | `web` | 仅启动 Web 前端 |

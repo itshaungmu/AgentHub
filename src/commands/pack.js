@@ -103,6 +103,7 @@ export async function packCommand(options) {
     tags: options.tags ? options.tags.split(",").map((t) => t.trim()) : [],
     category: options.category,
     version,
+    featured: options.featured === true,
   });
 
   // 5. 验证 MANIFEST

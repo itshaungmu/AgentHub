@@ -115,11 +115,12 @@ agenthub pack - 打包 Agent
   --version <ver>     版本号 (默认: 1.0.0)
   --tags <tags>       标签，逗号分隔
   --category <cat>    分类
+  --featured          标记为精选 Agent
 
 示例:
   agenthub pack --workspace ./my-agent --config ./openclaw.json
   agenthub pack --workspace ./my-agent --config ./openclaw.json --version 2.0.0
-  agenthub pack --workspace ./my-agent --config ./openclaw.json --name "Code Helper"
+  agenthub pack --workspace ./my-agent --config ./openclaw.json --name "Code Helper" --featured
 `,
     publish: `
 agenthub publish - 发布 Agent

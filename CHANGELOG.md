@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.4] - 2026-03-26
+
+### Added
+- **Featured Flag**: `--featured` option for pack command to mark quality agents
+  - Agents marked as featured get highlighted in Web UI
+  - Useful for promoting verified/official agents
+
+### Testing
+- **Featured Flag Test**: Added test for --featured option
+- Test count increased from 27 to 28 (100% pass rate)
+
 ## [0.4.3] - 2026-03-26
 
 ### Added
@@ -345,7 +356,8 @@ Product is ready for external promotion
 - CONTRIBUTING guide
 - MIT License
 
-[0.4.2]: https://github.com/itshaungmu/AgentHub/compare/v0.4.1...v0.4.2
+[0.4.4]: https://github.com/itshaungmu/AgentHub/compare/v0.4.3...v0.4.4
+[0.4.3]: https://github.com/itshaungmu/AgentHub/compare/v0.4.2...v0.4.3
 [0.4.1]: https://github.com/itshaungmu/AgentHub/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/itshaungmu/AgentHub/compare/v0.3.9...v0.4.0
 [0.3.9]: https://github.com/itshaungmu/AgentHub/compare/v0.3.8...v0.3.9

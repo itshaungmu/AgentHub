@@ -5,7 +5,7 @@
 
 const WORKSPACE_FILES = ["AGENTS.md", "SOUL.md", "USER.md", "IDENTITY.md", "TOOLS.md", "HEARTBEAT.md", "BOOTSTRAP.md"];
 
-export function createManifest({ slug, name, description, author, memoryCounts, openclawTemplate, skills = [], prompts = [], tags = [], category, language = "zh-CN", version = "1.0.0" }) {
+export function createManifest({ slug, name, description, author, memoryCounts, openclawTemplate, skills = [], prompts = [], tags = [], category, language = "zh-CN", version = "1.0.0", featured = false }) {
   const hasModel = openclawTemplate?.agents?.defaults?.model?.primary;
   const totalMemory = memoryCounts.public + memoryCounts.portable + memoryCounts.private;
 
@@ -69,6 +69,7 @@ export function createManifest({ slug, name, description, author, memoryCounts, 
       category: category || "General",
       language: language,
       license: "MIT",
+      featured,
     },
   };
 }

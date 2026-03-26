@@ -240,3 +240,31 @@ test("pack command supports custom name", async () => {
   assert.equal(manifest.name, "My Custom Agent");
   assert.equal(manifest.slug, "my-custom-agent");
 });
+
+test("pack command supports featured flag", async () => {
+  const temp = await createTempDir("agenthub-pack-featured-");
+  const workspace = path.join(temp, "workspace");
+  const output = path.join(temp, "output");
+  const configPath = path.join(temp, "openclaw.json");
+
+  await setupWorkspace(workspace);
+  await writeJson(configPath, {
+    agents: { defaults: { model: { primary: "anthropic/claude-3-5-sonnet" } } },
+  });
+
+  // Pack with featured flag
+  const result = runCli([
+    "pack",
+    "--workspace", workspace,
+    "--config", configPath,
+    "--output", output,
+    "--featured"
+  ]);
+
+  assert.equal(result.status, 0);
+
+  // Verify the manifest contains featured flag
+  const bundlePath = path.join(output, "workspace-1.0.0.agent");
+  const manifest = await readJson(path.join(bundlePath, "MANIFEST.json"));
+  assert.equal(manifest.metadata.featured, true);
+});

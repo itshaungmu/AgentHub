@@ -719,6 +719,25 @@ function page(title, body, options = {}) {
       transform: translateY(-4px);
       box-shadow: 0 16px 40px rgba(250, 112, 154, 0.15);
     }
+    .agent-card-featured {
+      border-color: var(--color-1);
+      background: linear-gradient(135deg, rgba(250, 112, 154, 0.03), rgba(255, 154, 139, 0.03));
+    }
+    .agent-card-featured:hover {
+      box-shadow: 0 16px 40px rgba(250, 112, 154, 0.25);
+    }
+    .featured-badge {
+      position: absolute;
+      top: -8px;
+      right: 12px;
+      background: linear-gradient(135deg, var(--color-1), var(--color-3));
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(250, 112, 154, 0.3);
+    }
     .agent-header {
       display: flex;
       align-items: flex-start;
@@ -1469,6 +1488,7 @@ export function renderAgentListPage({ query, agents, totalDownloads, apiBase }) 
   const cards = agents.map(agent => {
     const tags = agent.metadata?.tags || [];
     const category = agent.metadata?.category || 'default';
+    const featured = agent.metadata?.featured;
 
     const tagClass = {
       'ops': 'tag-ops',
@@ -1478,7 +1498,8 @@ export function renderAgentListPage({ query, agents, totalDownloads, apiBase }) 
     }[category] || 'tag-default';
 
     return `
-      <article class="agent-card" onclick="window.location='/agents/${agent.slug}'">
+      <article class="agent-card${featured ? ' agent-card-featured' : ''}" onclick="window.location='/agents/${agent.slug}'">
+        ${featured ? '<span class="featured-badge">⭐</span>' : ''}
         <div class="agent-header">
           <a href="/agents/${agent.slug}" class="agent-name" onclick="event.stopPropagation()">${agent.name || agent.slug}</a>
           <span class="agent-version">v${agent.version}</span>

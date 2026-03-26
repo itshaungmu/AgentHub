@@ -87,6 +87,28 @@ agenthub serve --registry ./.registry --port 3000
 
 访问 http://localhost:3000 查看你的 Agent！
 
+### 🎯 试用样板 Agent
+
+我们提供了一个官方样板 Agent，帮助你快速体验：
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/itshaungmu/AgentHub.git
+cd AgentHub
+
+# 2. 打包样板 Agent
+agenthub pack --workspace ./samples/code-review-assistant --config ./samples/code-review-assistant/openclaw.json
+
+# 3. 发布到本地 Registry
+agenthub publish ./bundles/code-review-assistant-1.0.0.agent --registry ./.registry
+
+# 4. 安装到你的 workspace
+agenthub install code-review-assistant --registry ./.registry --target-workspace ./my-workspace
+
+# 5. 校验安装
+agenthub verify code-review-assistant --registry ./.registry --target-workspace ./my-workspace
+```
+
 ---
 
 ## 📖 命令文档

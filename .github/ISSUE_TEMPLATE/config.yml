@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 查看文档
+    url: https://github.com/itshaungmu/AgentHub#readme
+    about: 查看完整的 README 和使用文档
+  - name: 💬 参与讨论
+    url: https://github.com/itshaungmu/AgentHub/discussions
+    about: 参与功能讨论和问题交流

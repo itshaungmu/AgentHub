@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2026-03-26
+
+### Community
+- **GitHub Issue Templates**: Add bug report, feature request, and feedback templates
+- Issue template config with links to docs and discussions
+
+### Documentation
+- Complete M1-C3 milestone: All community entry points ready
+
+## [0.3.1] - 2026-03-26
+
+### UX Improvements
+- **Smart Error Suggestions**: Automatically detect common error types and provide actionable advice
+- **Debug Logger**: Add `src/lib/debug.js` for performance tracing
+- Enable debug mode with `AGENTHUB_DEBUG=true`
+
+### Error Detection
+- File not found → Check path suggestions
+- Permission denied → Sudo advice
+- Network issues → Connection check tips
+
 ## [0.3.0] - 2026-03-26
 
 ### Milestone

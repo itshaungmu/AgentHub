@@ -158,22 +158,27 @@ agenthub search - 搜索 Agent
 
 选项:
   --registry <dir>    Registry 目录 (必需)
+  --json              JSON 格式输出
 
 示例:
   agenthub search "code review" --registry ./.registry
   agenthub search "" --registry ./.registry  # 列出所有
+  agenthub search "code" --registry ./.registry --json
 `,
     list: `
 agenthub list - 列出已安装 Agent
 
 用法:
-  agenthub list [--target-workspace <dir>]
+  agenthub list [--target-workspace <dir>] [--json]
 
 选项:
   --target-workspace <dir>  指定工作区目录（可选）
+  --json                    JSON 格式输出
 
 示例:
   agenthub list
+  agenthub list --target-workspace ./my-workspace
+  agenthub list --json
   agenthub list --target-workspace ./my-workspace
 `,
     verify: `
@@ -363,7 +368,9 @@ async function main() {
 
       case "search": {
         const results = await searchCommand(rest[0] || "", options);
-        if (results.length === 0) {
+        if (options.json) {
+          console.log(JSON.stringify({ agents: results, count: results.length, query: rest[0] || "" }, null, 2));
+        } else if (results.length === 0) {
           console.log(warning("未找到匹配的 Agent"));
         } else {
           console.log(`\n${infoColor(`找到 ${results.length} 个 Agent:`)}\n`);
@@ -377,14 +384,18 @@ async function main() {
       case "info": {
         if (!requireArg(rest[0], "错误: 需要指定 agent slug")) return;
         const result = await infoCommand(rest[0], options);
-        console.log(`\n${highlight("📦")} ${result.name} (${result.slug}@${result.version})`);
-        console.log(`   ${result.description}`);
-        console.log(`   ${muted("Runtime:")} ${result.runtime?.type || "openclaw"} ${result.runtime?.version || ""}`);
-        const mem = result.includes?.memory || {};
-        if (mem.count > 0) {
-          console.log(`   ${muted("Memory:")} ${mem.count} 条 (public: ${mem.public}, portable: ${mem.portable})`);
+        if (options.json) {
+          console.log(JSON.stringify(result, null, 2));
+        } else {
+          console.log(`\n${highlight("📦")} ${result.name} (${result.slug}@${result.version})`);
+          console.log(`   ${result.description}`);
+          console.log(`   ${muted("Runtime:")} ${result.runtime?.type || "openclaw"} ${result.runtime?.version || ""}`);
+          const mem = result.includes?.memory || {};
+          if (mem.count > 0) {
+            console.log(`   ${muted("Memory:")} ${mem.count} 条 (public: ${mem.public}, portable: ${mem.portable})`);
+          }
+          console.log(`\n   ${infoColor("安装命令:")} agenthub install ${result.slug}`);
         }
-        console.log(`\n   ${infoColor("安装命令:")} agenthub install ${result.slug}`);
         return;
       }
 
@@ -399,7 +410,11 @@ async function main() {
 
       case "list": {
         const list = await listCommand(options);
-        console.log(formatListOutput(list));
+        if (options.json) {
+          console.log(JSON.stringify({ agents: list, count: list.length }, null, 2));
+        } else {
+          console.log(formatListOutput(list));
+        }
         return;
       }
 

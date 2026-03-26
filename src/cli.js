@@ -28,6 +28,7 @@ import {
   formatVersionsOutput,
   doctorCommand,
 } from "./index.js";
+import { uninstallCommand, formatUninstallOutput } from "./commands/uninstall.js";
 
 import { success, error, warning, info as infoColor, highlight, muted, symbols } from "./lib/colors.js";
 import { setVerbose, debug } from "./lib/debug.js";
@@ -66,6 +67,7 @@ AgentHub v${VERSION} - AI Agent 打包与分发平台
   search      搜索 Registry 中的 Agent
   info        查看 Agent 详情
   list        列出当前目录/指定目录的已安装 Agent
+  uninstall   卸载已安装的 Agent
   verify      校验已安装 Agent 是否完整可用
   versions    查看 Agent 版本历史
   update      更新已安装 Agent 到最新版
@@ -183,6 +185,19 @@ agenthub list - 列出已安装 Agent
   agenthub list --target-workspace ./my-workspace
   agenthub list --json
   agenthub list --target-workspace ./my-workspace
+`,
+    uninstall: `
+agenthub uninstall - 卸载已安装 Agent
+
+用法:
+  agenthub uninstall <agent-slug> [--target-workspace <dir>]
+
+选项:
+  --target-workspace <dir>  指定工作区目录（可选）
+
+示例:
+  agenthub uninstall my-agent
+  agenthub uninstall my-agent --target-workspace ./my-workspace
 `,
     verify: `
 agenthub verify - 校验已安装 Agent
@@ -424,6 +439,13 @@ async function main() {
         } else {
           console.log(formatListOutput(list));
         }
+        return;
+      }
+
+      case "uninstall": {
+        if (!requireArg(rest[0], "错误: 需要指定 agent slug")) return;
+        const result = await uninstallCommand(rest[0], options);
+        console.log(formatUninstallOutput(result));
         return;
       }
 

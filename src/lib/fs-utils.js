@@ -1,4 +1,4 @@
-import { cp, mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
+import { cp, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 export async function ensureDir(dirPath) {
@@ -26,6 +26,10 @@ export async function pathExists(targetPath) {
   } catch {
     return false;
   }
+}
+
+export async function removeDir(dirPath) {
+  await rm(dirPath, { recursive: true, force: true });
 }
 
 export async function countFiles(dirPath) {

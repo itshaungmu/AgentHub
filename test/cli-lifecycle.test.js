@@ -154,3 +154,46 @@ test("command help exposes lifecycle entries", async () => {
   assert.match(runCli(["rollback", "--help"]).stdout, /agenthub rollback/);
   assert.match(runCli(["stats", "--help"]).stdout, /agenthub stats/);
 });
+
+test("uninstall removes installed agent", async () => {
+  const temp = await createTempDir("agenthub-uninstall-");
+  const { registry, targetWorkspace } = await buildTwoVersions(temp);
+
+  // Install agent first
+  assert.equal(
+    runCli(["install", "workspace:1.0.0", "--registry", registry, "--target-workspace", targetWorkspace]).status,
+    0,
+  );
+
+  // Verify it's installed
+  const listResult = runCli(["list", "--target-workspace", targetWorkspace]);
+  assert.equal(listResult.status, 0);
+  assert.match(listResult.stdout, /workspace@1\.0\.0/);
+
+  // Uninstall
+  const uninstallResult = runCli(["uninstall", "workspace", "--target-workspace", targetWorkspace]);
+  assert.equal(uninstallResult.status, 0);
+  assert.match(uninstallResult.stdout, /卸载成功/);
+
+  // Verify it's gone
+  const listAfterResult = runCli(["list", "--target-workspace", targetWorkspace]);
+  assert.equal(listAfterResult.status, 0);
+  assert.match(listAfterResult.stdout, /暂无已安装的 Agent/);
+});
+
+test("uninstall fails for non-existent install", async () => {
+  const temp = await createTempDir("agenthub-uninstall-notfound-");
+  const targetWorkspace = path.join(temp, "workspace");
+  await setupWorkspace(targetWorkspace);
+
+  // Try to uninstall non-existent agent
+  const uninstallResult = runCli(["uninstall", "non-existent", "--target-workspace", targetWorkspace]);
+  assert.equal(uninstallResult.status, 1);
+  // Error message is in stderr
+  assert.match(uninstallResult.stderr, /未找到安装记录/);
+});
+
+test("uninstall shows help", async () => {
+  const result = runCli(["uninstall", "--help"]);
+  assert.match(result.stdout, /agenthub uninstall/);
+});

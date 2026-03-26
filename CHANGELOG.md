@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.9] - 2026-03-26
+
+### Added
+- **Uninstall Command**: `agenthub uninstall <agent-slug>` - Remove installed agents from workspace
+  - Deletes .agenthub directory and install record
+  - Clear confirmation message with installation history
+  - Help text available via `agenthub uninstall --help`
+
+### Testing
+- **Uninstall Tests**: Added 3 new tests for uninstall command
+  - Uninstall removes installed agent
+  - Uninstall fails for non-existent install
+  - Uninstall shows help
+- Test count increased from 43 to 46 (100% pass rate)
+
 ## [0.4.8] - 2026-03-26
 
 ### Added
@@ -412,6 +427,7 @@ Product is ready for external promotion
 - CONTRIBUTING guide
 - MIT License
 
+[0.4.9]: https://github.com/itshaungmu/AgentHub/compare/v0.4.8...v0.4.9
 [0.4.8]: https://github.com/itshaungmu/AgentHub/compare/v0.4.7...v0.4.8
 [0.4.7]: https://github.com/itshaungmu/AgentHub/compare/v0.4.6...v0.4.7
 [0.4.6]: https://github.com/itshaungmu/AgentHub/compare/v0.4.5...v0.4.6

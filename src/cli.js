@@ -75,6 +75,8 @@ AgentHub v${VERSION} - AI Agent 打包与分发平台
   stats       查看 Agent 统计信息
   doctor      诊断 AgentHub 安装和环境问题
   serve       启动 Web + API 服务
+  api         仅启动 API 后端服务
+  web         仅启动 Web 前端服务
 
 选项:
   --help, -h      显示帮助信息

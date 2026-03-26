@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.6] - 2026-03-26
+
+### Added
+- **Growth Plan**: 4-week external distribution plan with content templates
+- **Feedback System**: Comprehensive feedback form and GitHub Issue template
+
+### Documentation
+- docs/growth-plan.md: External distribution strategy
+- docs/feedback-form.md: User feedback collection template
+- .github/ISSUE_TEMPLATE/feedback.md: GitHub Issue template
+
 ## [0.2.5] - 2026-03-26
 
 ### Documentation

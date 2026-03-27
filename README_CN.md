@@ -2,15 +2,16 @@
 
 # 🤖 AgentHub
 
-**AI Agent 的开源应用市场**
+**OpenClaw Agent 的打包、发布与分发平台**
 
+[![npm version](https://img.shields.io/npm/v/@zshuangmu/agenthub.svg)](https://www.npmjs.com/package/@zshuangmu/agenthub)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Node: >=18](https://img.shields.io/badge/Node.js->=18-green.svg)](https://nodejs.org/)
-[![GitHub Stars](https://img.shields.io/github/stars/agenthub/agenthub?style=social)](https://github.com/agenthub/agenthub)
+[![GitHub Stars](https://img.shields.io/github/stars/itshaungmu/AgentHub?style=social)](https://github.com/itshaungmu/AgentHub)
 
-**一句话打包上传 Agent 的全部能力（性格、记忆、技能）<br>一键下载获得这些功力**
+**把你调教好的 OpenClaw Agent 变成可复用、可分发、可升级的标准资产**
 
-🌐 **在线体验**: [https://agenthub.cyou](https://agenthub.cyou/)
+🌐 **在线演示**: [https://agenthub.cyou](https://agenthub.cyou/)
 
 [English](README.md) | [中文](README_CN.md)
 
@@ -20,81 +21,140 @@
 
 ## 🎯 AgentHub 是什么？
 
-AgentHub 是一个开源的 AI Agent 打包与分发平台。它可以让你：
+AgentHub 是一个专为 **OpenClaw** 设计的 Agent 打包与分发平台，类似于：
+- **Docker Hub** 之于 Docker 容器
+- **npm** 之于 Node.js 包
 
-- **📦 打包** Agent 的性格、记忆和技能到一个 Bundle
-- **🚀 发布** 到本地或远程仓库，只需一条命令
-- **🔍 发现** 和搜索市场上的 Agent
-- **⚡ 安装** Agent 到任何工作区，即刻可用
+但专注于 **OpenClaw Agent 的分发与复刻**。
 
-非常适合想要在项目间共享 AI 能力的团队，或者想要备份和版本管理 Agent 配置的个人用户。
+### 核心能力
 
-## ✨ 特性
-
-| 特性 | 说明 |
+| 能力 | 描述 |
 |------|------|
-| 📦 **一键打包** | 自动扫描工作区，打包 Agent 能力 |
-| 🚀 **本地优先** | 无需云端，完全在本地运行 |
-| 🌐 **Web 界面** | 精美的深色主题 UI，支持中英文切换 |
-| 🔐 **记忆分层** | 三层记忆架构：公开、可移植、私有 |
-| 🔄 **版本管理** | 完整的版本历史，支持回滚 |
-| 📊 **数据统计** | 内置下载追踪和统计分析 |
+| 📦 **一键打包** | 将 Agent 的 personality、memory、skills 打包成标准 Bundle |
+| 🚀 **发布分发** | 发布到本地或远程 Registry，生成可分享链接 |
+| ⚡ **一键安装** | 团队成员通过统一命令安装，复刻完整 Agent 能力 |
+| 🔄 **版本管理** | 完整的升级、回滚、校验支持 |
+
+### 适合谁？
+
+- **✅ OpenClaw 团队用户**: 统一分发、版本管理、团队复用
+- **✅ Agent 创作者**: 打包分享你调教好的 Agent
+- **✅ AI 重度用户**: 快速获得别人调教好的 Agent 能力
+
+### 不适合谁？
+
+- ❌ 非 OpenClaw 用户（当前仅支持 OpenClaw）
+- ❌ 需要 Prompt 收藏夹（请使用专门的 Prompt 工具）
+- ❌ 单个 Skill 分发（请使用 ClawHub）
+
+## 🎯 官方样板 Agent
+
+我们提供了 3 个官方样板 Agent，帮助你快速上手：
+
+| Agent | 描述 | 适用场景 |
+|-------|------|----------|
+| **code-review-assistant** | 代码审查助手 | 代码质量审查、安全漏洞识别 |
+| **team-knowledge-assistant** | 团队知识问答 | 项目信息检索、新员工入职 |
+| **product-doc-writer** | 产品文档撰写 | 功能文档、用户指南、API 文档 |
+
+### 快速试用
+
+```bash
+# 打包任意样板 Agent
+agenthub pack --workspace ./samples/code-review-assistant --config ./samples/code-review-assistant/openclaw.json
+
+# 发布并安装
+agenthub publish ./bundles/code-review-assistant-1.0.0.agent --registry ./.registry
+agenthub install code-review-assistant --registry ./.registry --target-workspace ./workspace
+```
 
 ## 📸 截图
 
-![alt text](./docs/image-cn.png)
+![AgentHub Web Interface](./docs/image.png)
 
-## 🚀 快速开始
+## 🚀 3 步上手
 
-### 安装
+### 第一步：安装
 
 ```bash
-# 克隆仓库
-git clone https://github.com/agenthub/agenthub.git
-cd agenthub
+# 通过 npm 全局安装
+npm install -g @zshuangmu/agenthub
 
-# 安装依赖
-npm install
-
-# 链接到全局（可选）
-npm link
+# 或克隆源码
+git clone https://github.com/itshaungmu/AgentHub.git
+cd AgentHub && npm install && npm link
 ```
 
-### 基本使用
+### 第二步：打包并发布你的 Agent
 
 ```bash
-# 1. 打包你的 Agent
-agenthub pack --workspace ./my-agent --config openclaw.json
+# 1. 打包你的 OpenClaw workspace
+agenthub pack --workspace ./my-workspace --config openclaw.json
 
-# 2. 发布到仓库
+# 或指定版本号
+agenthub pack --workspace ./my-workspace --config openclaw.json --version 2.0.0
+
+# 2. 发布到 Registry
 agenthub publish ./bundles/my-agent.agent --registry ./.registry
+```
 
-# 3. 启动 Web 界面
+### 第三步：团队成员安装使用
+
+```bash
+# 团队成员一键安装
+agenthub install my-agent --registry ./.registry --target-workspace ./workspace
+
+# 或启动 Web 界面浏览
 agenthub serve --registry ./.registry --port 3000
 ```
 
 访问 http://localhost:3000 查看你的 Agent！
 
-## 📖 文档
+### 🎯 试用样板 Agent
 
-### 命令
+我们提供了一个官方样板 Agent，帮助你快速体验：
 
-| 命令 | 说明 |
+```bash
+# 1. 克隆仓库
+git clone https://github.com/itshaungmu/AgentHub.git
+cd AgentHub
+
+# 2. 打包样板 Agent
+agenthub pack --workspace ./samples/code-review-assistant --config ./samples/code-review-assistant/openclaw.json
+
+# 3. 发布到本地 Registry
+agenthub publish ./bundles/code-review-assistant-1.0.0.agent --registry ./.registry
+
+# 4. 安装到你的 workspace
+agenthub install code-review-assistant --registry ./.registry --target-workspace ./my-workspace
+
+# 5. 校验安装
+agenthub verify code-review-assistant --registry ./.registry --target-workspace ./my-workspace
+```
+
+---
+
+## 📖 命令文档
+
+### CLI 命令
+
+| 命令 | 描述 |
 |------|------|
-| `pack` | 打包工作区为 Agent Bundle |
-| `publish` | 发布到本地仓库 |
+| `pack` | 打包 workspace 为 Agent Bundle（支持 `--version` 指定版本） |
+| `publish` | 发布到本地 Registry |
 | `publish-remote` | 发布到远程服务器 |
-| `search` | 搜索仓库中的 Agent |
+| `search` | 搜索 Registry 中的 Agent |
 | `info` | 查看 Agent 详情 |
-| `install` | 安装 Agent 到工作区 |
+| `install` | 安装 Agent 到 workspace |
 | `list` | 列出已安装的 Agent |
 | `uninstall` | 卸载已安装的 Agent |
 | `verify` | 校验已安装 Agent 是否完整 |
-| `versions` | 查看版本历史 |
-| `update` | 更新到最新版 |
-| `rollback` | 回滚到指定版本 |
-| `stats` | 查看详细统计 |
-| `doctor` | 诊断安装和环境问题 |
+| `versions` | 查看 Agent 版本历史 |
+| `update` | 更新 Agent 到最新版 |
+| `rollback` | 回滚 Agent 到指定版本 |
+| `stats` | 查看 Agent 统计信息 |
+| `doctor` | 诊断 AgentHub 安装和环境问题 |
 | `serve` | 启动 Web + API 服务 |
 | `api` | 仅启动 API 服务 |
 | `web` | 仅启动 Web 前端 |
@@ -102,7 +162,10 @@ agenthub serve --registry ./.registry --port 3000
 ### HTTP API
 
 ```bash
-# 获取所有 Agent
+# 健康检查
+curl http://localhost:3001/api/health
+
+# 列出所有 Agent
 curl http://localhost:3001/api/agents
 
 # 搜索 Agent
@@ -111,8 +174,20 @@ curl "http://localhost:3001/api/agents?q=react"
 # 获取 Agent 详情
 curl http://localhost:3001/api/agents/my-agent
 
-# 获取统计数据
+# 下载 Agent Bundle
+curl http://localhost:3001/api/agents/my-agent/download
+
+# 获取统计信息
 curl http://localhost:3001/api/stats
+
+# 获取下载排行
+curl "http://localhost:3001/api/stats/ranking?limit=10"
+
+# 发布 Agent (POST)
+curl -X POST http://localhost:3001/api/publish -H "Content-Type: application/json" -d '{"slug":"my-agent","version":"1.0.0"}'
+
+# 上传发布 Agent (POST)
+curl -X POST http://localhost:3001/api/publish-upload -H "Content-Type: application/json" -d '{"bundleData":"..."}'
 ```
 
 ### AI 自动发现
@@ -123,12 +198,20 @@ curl http://localhost:3001/api/stats
 curl http://localhost:3001/api/skills/agenthub-discover
 ```
 
+## 📚 教程文档
+
+| 教程 | 描述 |
+|------|------|
+| [3 步复刻 Agent](./docs/quick-start-3-steps.md) | 10 分钟快速上手指南 |
+| [团队分发指南](./docs/team-distribution-guide.md) | 如何把团队 Agent 标准化分发 |
+| [常见问题 FAQ](./docs/faq.md) | 常见问题解答 |
+
 ## 🏗️ 架构
 
 ```
 ┌─────────────────┐     pack      ┌─────────────────┐    publish    ┌─────────────────┐
 │   OpenClaw      │  ──────────►  │    Bundle       │  ──────────►  │    Registry     │
-│   工作区         │               │   (*.agent)     │               │   (.registry)   │
+│   Workspace     │               │   (*.agent)     │               │   (.registry)   │
 └─────────────────┘               └─────────────────┘               └─────────────────┘
                                                                           │
                                           ┌───────────────────────────────┘
@@ -150,13 +233,20 @@ npm test
 node src/cli.js serve --registry ./.registry
 ```
 
+## 🐳 Docker 部署
+
+```bash
+# 生产环境启动（容器内）
+NODE_ENV=production node src/cli.js serve --registry ./.registry --port 3000 --host 0.0.0.0
+```
+
 ## 🤝 贡献
 
-我们欢迎各种形式的贡献！详情请查看 [CONTRIBUTING.md](CONTRIBUTING.md)。
+欢迎贡献！请查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解详情。
 
-- 🐛 [报告 Bug](https://github.com/agenthub/agenthub/issues/new?template=bug_report.md)
-- 💡 [功能建议](https://github.com/agenthub/agenthub/issues/new?template=feature_request.md)
-- 🔧 [提交 PR](https://github.com/agenthub/agenthub/pulls)
+- 🐛 [报告 Bug](https://github.com/itshaungmu/AgentHub/issues/new?template=bug_report.md)
+- 💡 [请求功能](https://github.com/itshaungmu/AgentHub/issues/new?template=feature_request.md)
+- 🔧 [提交 PR](https://github.com/itshaungmu/AgentHub/pulls)
 
 ## 📄 许可证
 
@@ -164,8 +254,8 @@ node src/cli.js serve --registry ./.registry
 
 ## 🙏 致谢
 
-- 为 [OpenClaw](https://github.com/openclaw) 生态构建
-- 灵感来源于 npm 和 Docker Hub
+- 为 [OpenClaw](https://github.com/openclaw) 生态系统构建
+- 灵感来自 npm 和 Docker Hub
 
 ---
 
@@ -173,6 +263,6 @@ node src/cli.js serve --registry ./.registry
 
 **[⬆ 返回顶部](#agenthub)**
 
-由 AgentHub 团队用 ❤️ 制作
+Made with ❤️ by the AgentHub Team
 
 </div>

@@ -183,19 +183,15 @@ const langScript = `
         el.placeholder = window.i18n[lang][key];
       }
     });
-    // Update active button
     document.querySelectorAll('.lang-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.lang === lang);
     });
-    // Update html lang attribute
     document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
   }
 
-  // Theme toggle function
   function setTheme(theme) {
     localStorage.setItem('agenthub-theme', theme);
     document.documentElement.setAttribute('data-theme', theme);
-    // Update theme button icon
     const themeBtn = document.querySelector('.theme-btn');
     if (themeBtn) {
       themeBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
@@ -214,15 +210,12 @@ const langScript = `
 
   document.addEventListener('DOMContentLoaded', () => {
     setLang(savedLang);
-    // Initialize theme (default to light)
     const savedTheme = localStorage.getItem('agenthub-theme') || 'light';
     setTheme(savedTheme);
 
-    // Copy to clipboard with fallback
+    // Copy to clipboard
     async function copyText(text) {
-      if (navigator.clipboard?.writeText) {
-        return navigator.clipboard.writeText(text);
-      }
+      if (navigator.clipboard?.writeText) return navigator.clipboard.writeText(text);
       const ta = Object.assign(document.createElement('textarea'), { value: text, style: 'position:fixed;opacity:0' });
       document.body.appendChild(ta);
       ta.select();
@@ -230,12 +223,10 @@ const langScript = `
       ta.remove();
     }
 
-    // Initialize copy buttons
     document.querySelectorAll('.api-code, .detail-install').forEach(el => {
       el.addEventListener('click', () => {
         const text = el.querySelector('.code-text')?.textContent.trim() || el.textContent.trim();
         const btn = el.querySelector('.copy-btn');
-
         copyText(text).then(() => {
           if (!btn) return;
           btn.textContent = '✓';
@@ -244,6 +235,89 @@ const langScript = `
         }).catch(e => console.error('Copy failed:', e));
       });
     });
+
+    // === Client-side search & filter ===
+    const searchInput = document.getElementById('agent-search');
+    const categoryTabs = document.querySelectorAll('.category-tab');
+    const agentCards = document.querySelectorAll('.agent-card');
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    const noResults = document.querySelector('.no-results');
+    let visibleCount = 0;
+    const PAGE_SIZE = 12;
+    let currentCategory = 'all';
+    let searchTerm = '';
+
+    function getFilteredCards() {
+      return Array.from(agentCards).filter(card => {
+        const matchCategory = currentCategory === 'all' || card.dataset.category === currentCategory;
+        const matchSearch = !searchTerm || card.textContent.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchCategory && matchSearch;
+      });
+    }
+
+    function updateDisplay() {
+      const filtered = getFilteredCards();
+      agentCards.forEach(c => c.classList.add('hidden'));
+      filtered.forEach(c => c.classList.remove('hidden'));
+
+      visibleCount = Math.min(PAGE_SIZE, filtered.length);
+      filtered.slice(0, visibleCount).forEach(c => c.classList.remove('hidden'));
+
+      if (loadMoreBtn) {
+        loadMoreBtn.style.display = visibleCount < filtered.length ? 'inline-block' : 'none';
+      }
+      if (noResults) {
+        noResults.classList.toggle('show', filtered.length === 0);
+      }
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        searchTerm = e.target.value;
+        updateDisplay();
+      });
+      // Prevent form submit for client-side search
+      const form = searchInput.closest('form');
+      if (form) {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          searchTerm = searchInput.value;
+          updateDisplay();
+        });
+      }
+    }
+
+    categoryTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        categoryTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentCategory = tab.dataset.category;
+        updateDisplay();
+      });
+    });
+
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener('click', () => {
+        const filtered = getFilteredCards();
+        visibleCount = Math.min(visibleCount + PAGE_SIZE, filtered.length);
+        filtered.slice(0, visibleCount).forEach(c => c.classList.remove('hidden'));
+        loadMoreBtn.style.display = visibleCount < filtered.length ? 'inline-block' : 'none';
+      });
+    }
+
+    updateDisplay();
+
+    // === Scroll reveal animation ===
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
   });
 })();
 </script>
@@ -378,13 +452,51 @@ function page(title, body, options = {}) {
 
     /* Animations */
     @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(16px); }
+      from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
     }
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+    @keyframes countUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
     a { color: inherit; text-decoration: none; }
     .container {
       max-width: 1200px;
@@ -540,50 +652,79 @@ function page(title, body, options = {}) {
     /* Hero - Sunset gradient style */
     .hero {
       text-align: center;
-      padding: 72px 20px 56px;
+      padding: 80px 20px 64px;
       position: relative;
+      overflow: hidden;
     }
     .hero::before {
       content: '';
       position: absolute;
-      top: -20px;
+      top: -40px;
       left: 50%;
       transform: translateX(-50%);
-      width: 800px;
-      height: 500px;
-      background: radial-gradient(ellipse at center, rgba(250, 112, 154, 0.08) 0%, rgba(254, 225, 64, 0.05) 40%, transparent 70%);
+      width: 900px;
+      height: 600px;
+      background: radial-gradient(ellipse at center, rgba(250, 112, 154, 0.1) 0%, rgba(254, 225, 64, 0.06) 30%, rgba(255, 183, 77, 0.04) 50%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+      animation: pulse 6s ease-in-out infinite;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px;
+      height: 600px;
+      background: conic-gradient(from 0deg, transparent, rgba(250, 112, 154, 0.04), transparent, rgba(254, 152, 0, 0.04), transparent);
+      border-radius: 50%;
+      animation: spin 20s linear infinite;
       pointer-events: none;
       z-index: -1;
     }
+    @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
     .hero h1 {
       font-family: var(--font-display);
-      font-size: clamp(40px, 8vw, 64px);
+      font-size: clamp(42px, 8vw, 72px);
       font-weight: 700;
-      margin-bottom: 16px;
-      letter-spacing: -0.03em;
-      background: linear-gradient(135deg, var(--color-1) 0%, var(--color-3) 50%, var(--color-2) 100%);
+      margin-bottom: 20px;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, var(--color-1) 0%, var(--color-3) 40%, var(--color-2) 70%, var(--color-1) 100%);
+      background-size: 200% auto;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      animation: fadeInUp 0.6s ease-out;
+      animation: fadeInUp 0.6s ease-out, gradientShift 6s ease infinite;
     }
     .hero-subtitle {
-      font-size: 17px;
+      font-size: 18px;
       color: var(--text-secondary);
-      max-width: 560px;
-      margin: 0 auto 44px;
-      line-height: 1.75;
+      max-width: 600px;
+      margin: 0 auto 48px;
+      line-height: 1.8;
       animation: fadeInUp 0.6s ease-out 0.1s backwards;
     }
     .hero-stats {
       display: flex;
       justify-content: center;
-      gap: 56px;
-      margin-bottom: 44px;
+      gap: 48px;
+      margin-bottom: 48px;
       animation: fadeInUp 0.6s ease-out 0.2s backwards;
     }
     .hero-stat {
       text-align: center;
+      padding: 16px 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      transition: all 0.3s ease;
+      min-width: 140px;
+    }
+    .hero-stat:hover {
+      border-color: var(--color-1);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(250, 112, 154, 0.1);
     }
     .hero-stat-value {
       font-family: var(--font-display);
@@ -601,23 +742,23 @@ function page(title, body, options = {}) {
       text-transform: uppercase;
       letter-spacing: 0.1em;
       font-weight: 600;
-      margin-top: 4px;
+      margin-top: 6px;
     }
 
     /* Features - Warm coral accents */
     .features {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
+      gap: 18px;
       margin-bottom: 56px;
     }
     .feature-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 28px 24px;
+      padding: 32px 24px;
       text-align: center;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       overflow: hidden;
     }
@@ -632,31 +773,45 @@ function page(title, body, options = {}) {
       opacity: 0;
       transition: opacity 0.3s;
     }
+    .feature-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(250, 112, 154, 0.03), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
     .feature-card:hover {
       border-color: var(--color-1);
-      transform: translateY(-4px);
-      box-shadow: 0 12px 32px rgba(250, 112, 154, 0.12);
+      transform: translateY(-6px);
+      box-shadow: 0 16px 40px rgba(250, 112, 154, 0.12);
     }
     .feature-card:hover::before {
       opacity: 1;
     }
-    .feature-icon {
-      font-size: 32px;
-      margin-bottom: 14px;
-      display: block;
+    .feature-card:hover::after {
+      opacity: 1;
     }
+    .feature-icon {
+      font-size: 36px;
+      margin-bottom: 16px;
+      display: block;
+      animation: float 3s ease-in-out infinite;
+    }
+    .feature-card:nth-child(2) .feature-icon { animation-delay: 0.5s; }
+    .feature-card:nth-child(3) .feature-icon { animation-delay: 1s; }
     .feature-title {
       font-family: var(--font-display);
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 600;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       letter-spacing: -0.01em;
       color: var(--text-primary);
     }
     .feature-desc {
       font-size: 13px;
       color: var(--text-secondary);
-      line-height: 1.6;
+      line-height: 1.7;
     }
 
     /* Section - Coral themed */
@@ -694,16 +849,30 @@ function page(title, body, options = {}) {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 18px;
+      transition: all 0.3s ease;
     }
     .agent-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 22px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 24px;
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
       animation: fadeInUp 0.5s ease-out backwards;
       position: relative;
+      overflow: hidden;
+    }
+    .agent-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-1), var(--color-3), var(--color-2));
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+      transform-origin: left;
     }
     .agent-card:nth-child(1) { animation-delay: 0.05s; }
     .agent-card:nth-child(2) { animation-delay: 0.1s; }
@@ -716,8 +885,11 @@ function page(title, body, options = {}) {
     .agent-card:hover {
       background: var(--bg-card-hover);
       border-color: var(--color-1);
-      transform: translateY(-4px);
-      box-shadow: 0 16px 40px rgba(250, 112, 154, 0.15);
+      transform: translateY(-6px);
+      box-shadow: 0 20px 48px rgba(250, 112, 154, 0.15);
+    }
+    .agent-card:hover::after {
+      transform: scaleX(1);
     }
     .agent-card-featured {
       border-color: var(--color-1);
@@ -1197,26 +1369,45 @@ function page(title, body, options = {}) {
     .how-it-works {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
+      gap: 32px;
       margin-bottom: 56px;
+      position: relative;
+    }
+    .how-it-works::before {
+      content: '';
+      position: absolute;
+      top: 36px;
+      left: 16%;
+      right: 16%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--color-1), var(--color-3), var(--color-2));
+      opacity: 0.2;
+      z-index: 0;
     }
     .step {
       text-align: center;
+      position: relative;
+      z-index: 1;
     }
     .step-number {
-      width: 48px;
-      height: 48px;
+      width: 52px;
+      height: 52px;
       background: linear-gradient(135deg, var(--color-1) 0%, var(--color-3) 100%);
       color: #ffffff;
-      border-radius: 14px;
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: var(--font-display);
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 700;
-      margin: 0 auto 16px;
+      margin: 0 auto 18px;
       box-shadow: 0 8px 24px rgba(250, 112, 154, 0.25);
+      transition: all 0.3s ease;
+    }
+    .step:hover .step-number {
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: 0 12px 32px rgba(250, 112, 154, 0.35);
     }
     .step h4 {
       font-family: var(--font-display);
@@ -1228,6 +1419,98 @@ function page(title, body, options = {}) {
       color: var(--text-secondary);
       font-size: 13px;
       line-height: 1.6;
+    }
+
+    /* Category filter tabs */
+    .category-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
+    .category-tab {
+      padding: 8px 18px;
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      font-family: var(--font-display);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .category-tab:hover {
+      border-color: var(--color-1);
+      color: var(--color-1);
+      background: var(--accent-glow);
+    }
+    .category-tab.active {
+      background: linear-gradient(135deg, var(--color-1), var(--color-3));
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(250, 112, 154, 0.25);
+    }
+    .category-tab .count {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      padding: 1px 7px;
+      border-radius: 10px;
+      font-size: 11px;
+      margin-left: 4px;
+    }
+    .category-tab.active .count {
+      background: rgba(255,255,255,0.3);
+    }
+    .category-tab:not(.active) .count {
+      background: var(--bg-secondary);
+    }
+
+    /* Load more */
+    .load-more-wrap {
+      text-align: center;
+      margin-top: 28px;
+    }
+    .load-more-btn {
+      padding: 12px 36px;
+      border-radius: 12px;
+      border: 2px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 600;
+      font-family: var(--font-display);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .load-more-btn:hover {
+      border-color: var(--color-1);
+      color: var(--color-1);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(250, 112, 154, 0.12);
+    }
+    .load-more-btn:active {
+      transform: translateY(0);
+    }
+    .agent-card.hidden {
+      display: none;
+    }
+
+    /* No results */
+    .no-results {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-muted);
+      display: none;
+    }
+    .no-results.show {
+      display: block;
+    }
+    .no-results-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      opacity: 0.5;
     }
 
     /* Search - Coral themed */
@@ -1304,9 +1587,21 @@ function page(title, body, options = {}) {
     /* Footer - Coral themed */
     footer {
       border-top: 1px solid var(--border);
-      padding: 36px 0;
-      margin-top: 64px;
+      padding: 48px 0;
+      margin-top: 80px;
       background: var(--bg-secondary);
+      position: relative;
+    }
+    footer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-1), var(--color-3), var(--color-2), var(--color-1));
+      background-size: 200% auto;
+      animation: gradientShift 4s linear infinite;
     }
     .footer-content {
       display: flex;
@@ -1321,12 +1616,14 @@ function page(title, body, options = {}) {
       gap: 12px;
     }
     .footer-brand-icon {
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
+      font-size: 24px;
+      background: var(--accent-glow);
+      border-radius: 10px;
     }
     .footer-brand-text {
       font-family: var(--font-display);
@@ -1344,6 +1641,10 @@ function page(title, body, options = {}) {
     .footer-powered a {
       color: var(--color-1);
       font-weight: 600;
+      transition: color 0.2s;
+    }
+    .footer-powered a:hover {
+      color: var(--color-3);
     }
     .footer-links {
       display: flex;
@@ -1354,7 +1655,7 @@ function page(title, body, options = {}) {
       font-size: 13px;
       font-family: var(--font-display);
       font-weight: 500;
-      transition: color 0.2s;
+      transition: all 0.2s;
     }
     .footer-links a:hover {
       color: var(--color-1);
@@ -1364,10 +1665,12 @@ function page(title, body, options = {}) {
       .hero { padding: 48px 16px 40px; }
       .hero h1 { font-size: clamp(32px, 7vw, 44px); }
       .hero-subtitle { font-size: 15px; padding: 0 12px; }
-      .hero-stats { gap: 32px; flex-wrap: wrap; }
-      .hero-stat-value { font-size: 30px; }
+      .hero-stats { gap: 16px; flex-wrap: wrap; }
+      .hero-stat { min-width: 100px; padding: 12px 16px; }
+      .hero-stat-value { font-size: 28px; }
       .features { grid-template-columns: 1fr; gap: 14px; }
       .how-it-works { grid-template-columns: 1fr; gap: 24px; }
+      .how-it-works::before { display: none; }
       .detail-grid { grid-template-columns: repeat(2, 1fr); }
       .agent-grid { grid-template-columns: 1fr; }
       .footer-content { flex-direction: column; text-align: center; gap: 20px; }
@@ -1396,12 +1699,16 @@ function page(title, body, options = {}) {
       .stats-table th, .stats-table td { padding: 12px 10px; font-size: 13px; }
       .step-number { width: 42px; height: 42px; font-size: 16px; }
       .step h4 { font-size: 14px; }
+      .category-filters { gap: 6px; }
+      .category-tab { padding: 6px 14px; font-size: 12px; }
     }
 
     @media (max-width: 480px) {
       .theme-btn { width: 32px; height: 32px; font-size: 14px; }
-      .hero-stat-value { font-size: 26px; }
+      .hero-stat-value { font-size: 24px; }
       .hero-stat-label { font-size: 10px; }
+      .hero-stats { gap: 10px; }
+      .hero-stat { min-width: 80px; padding: 10px 12px; }
       .nav-links { gap: 12px; }
       .nav-links a { font-size: 12px; }
       .section-title { font-size: 18px; }
@@ -1465,6 +1772,13 @@ ${langScript}`;
 export function renderAgentListPage({ query, agents, totalDownloads, apiBase }) {
   const agentCount = agents.length;
 
+  // Count agents per category
+  const categoryCounts = {};
+  agents.forEach(a => {
+    const cat = a.metadata?.category || 'default';
+    categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+  });
+
   const features = `
     <div class="features">
       <div class="feature-card">
@@ -1498,7 +1812,7 @@ export function renderAgentListPage({ query, agents, totalDownloads, apiBase }) 
     }[category] || 'tag-default';
 
     return `
-      <article class="agent-card${featured ? ' agent-card-featured' : ''}" onclick="window.location='/agents/${agent.slug}'">
+      <article class="agent-card hidden" data-category="${category}" onclick="window.location='/agents/${agent.slug}'">
         ${featured ? '<span class="featured-badge">⭐</span>' : ''}
         <div class="agent-header">
           <a href="/agents/${agent.slug}" class="agent-name" onclick="event.stopPropagation()">${agent.name || agent.slug}</a>
@@ -1519,8 +1833,24 @@ export function renderAgentListPage({ query, agents, totalDownloads, apiBase }) 
     `;
   }).join('');
 
+  // Category filter tabs
+  const categoryFilters = `
+    <div class="category-filters">
+      <button class="category-tab active" data-category="all">All<span class="count">${agentCount}</span></button>
+      ${Object.entries(categoryCounts).sort((a, b) => b[1] - a[1]).map(([cat, count]) => {
+        const tagClass = {
+          'ops': 'tag-ops',
+          'engineering': 'tag-engineering',
+          'content': 'tag-content',
+          'product': 'tag-product'
+        }[cat] || 'tag-default';
+        return `<button class="category-tab" data-category="${cat}">${cat}<span class="count">${count}</span></button>`;
+      }).join('')}
+    </div>
+  `;
+
   const howItWorks = `
-    <div class="section">
+    <div class="section reveal">
       <h2 class="section-title" style="text-align: center; margin-bottom: 32px;" data-i18n="howToUse">How to Use</h2>
       <div class="how-it-works">
         <div class="step">
@@ -1543,7 +1873,7 @@ export function renderAgentListPage({ query, agents, totalDownloads, apiBase }) 
   `;
 
   const apiBox = `
-    <div class="api-box">
+    <div class="api-box reveal">
       <h3 data-i18n="apiBoxTitle">🤖 AI Auto-Discovery API</h3>
       <p data-i18n="apiBoxDesc">Let your AI assistant automatically discover and install Agents</p>
       <div class="api-code" title="Click to copy">
@@ -1584,11 +1914,20 @@ export function renderAgentListPage({ query, agents, totalDownloads, apiBase }) 
         <a href="/stats" class="section-link" data-i18n="sectionViewAll">View All →</a>
       </div>
       <form class="search-box" method="get" action="/">
-        <input type="search" name="q" value="${query ?? ""}" data-i18n-placeholder="searchPlaceholder" placeholder="Search Agents, skills, tags..." />
+        <input id="agent-search" type="search" name="q" value="${query ?? ""}" data-i18n-placeholder="searchPlaceholder" placeholder="Search Agents, skills, tags..." />
         <button type="submit" data-i18n="searchButton">Search</button>
       </form>
+      ${categoryFilters}
+      <div class="no-results">
+        <div class="no-results-icon">🔍</div>
+        <h3>No matching agents found</h3>
+        <p>Try adjusting your search or filter</p>
+      </div>
       <div class="agent-grid">
         ${cards || `<div class="empty-state"><h3 data-i18n="noAgents">No Agents yet</h3><p data-i18n="noAgentsHint">Use <code>agenthub pack</code> to package your first Agent!</p></div>`}
+      </div>
+      <div class="load-more-wrap">
+        <button id="load-more-btn" class="load-more-btn">Load More Agents</button>
       </div>
     </section>
 

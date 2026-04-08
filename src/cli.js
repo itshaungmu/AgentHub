@@ -122,11 +122,18 @@ agenthub pack - 打包 Agent
   --tags <tags>       标签，逗号分隔
   --category <cat>    分类
   --featured          标记为精选 Agent
+  --strict            严格模式：发现高危敏感信息时中止打包
+  --no-strip-private  不自动剥离私有数据（默认自动剥离）
+  --skip-scan         跳过安全扫描
+
+🛡️ 隐私防护（默认开启）:
+  打包时自动排除 memory/private、.env、API Key 等敏感数据
+  使用 --strict 可在发现高危问题时中止打包
 
 示例:
   agenthub pack --workspace ./my-agent --config ./openclaw.json
-  agenthub pack --workspace ./my-agent --config ./openclaw.json --version 2.0.0
-  agenthub pack --workspace ./my-agent --config ./openclaw.json --name "Code Helper" --featured
+  agenthub pack --workspace ./my-agent --config ./openclaw.json --strict
+  agenthub pack --workspace ./my-agent --config ./openclaw.json --skip-scan
 `,
     publish: `
 agenthub publish - 发布 Agent
@@ -431,8 +438,44 @@ async function main() {
           process.exitCode = 1;
           return;
         }
+        // 处理 --no-strip-private 标志
+        if (options['no-strip-private'] || options.noStripPrivate) {
+          options.stripPrivate = false;
+        }
         const result = await packCommand(options);
-        console.log(success(`${symbols.success} 打包完成: ${result.bundleDir}`));
+        console.log(success(`\n${symbols.success} 打包完成: ${result.bundleDir}`));
+        // 输出隐私防护报告
+        if (result.privacy) {
+          console.log(`  ${muted('🛡️ 隐私防护:')} ${result.privacy.stripped ? '已启用' : '未启用'}`);
+          console.log(`  ${muted('📁 已复制:')} ${result.privacy.copiedFiles} 个文件`);
+          if (result.privacy.skippedFiles > 0) {
+            console.log(`  ${warning('🚫 已剥离 ' + result.privacy.skippedFiles + ' 个文件/目录:')}`);
+            for (const skipped of result.privacy.skippedList) {
+              // 根据路径类型标注图标
+              let icon = '  ◦';
+              if (skipped.includes('memory/private') || skipped === 'memory/private') {
+                icon = '  🔒';
+              } else if (skipped.startsWith('.env') || skipped === '.npmrc' || skipped === '.netrc') {
+                icon = '  🔑';
+              } else if (skipped === '.git' || skipped === '.vscode' || skipped === '.idea') {
+                icon = '  📂';
+              } else if (skipped === 'node_modules') {
+                icon = '  📦';
+              }
+              console.log(`    ${icon} ${muted(skipped)}`);
+            }
+          }
+        }
+        if (result.security) {
+          if (result.security.findingsCount > 0) {
+            console.log(warning(`  ⚠️ 安全扫描: 发现 ${result.security.findingsCount} 个潜在风险`));
+            for (const w of result.security.warnings.slice(0, 5)) {
+              console.log(`     ${w}`);
+            }
+          } else {
+            console.log(`  ${success('✅ 安全扫描: 未发现敏感信息')}`);
+          }
+        }
         return;
       }
 

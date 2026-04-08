@@ -53,6 +53,52 @@ export async function initDatabase(registryDir) {
   db.run(`CREATE INDEX IF NOT EXISTS idx_download_stats_slug ON download_stats(agent_slug)`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_download_logs_slug ON download_logs(agent_slug)`);
 
+  // === P1: 用户认证与权限表 ===
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      email TEXT,
+      role TEXT DEFAULT 'user',
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS api_tokens (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      token_hash TEXT NOT NULL UNIQUE,
+      label TEXT DEFAULT 'default',
+      scopes TEXT DEFAULT 'read:agent,publish',
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      expires_at TEXT,
+      revoked_at TEXT,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS audit_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
+      username TEXT,
+      action TEXT NOT NULL,
+      resource TEXT,
+      details TEXT,
+      ip_address TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  db.run(`CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_api_tokens_hash ON api_tokens(token_hash)`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_audit_logs_user ON audit_logs(user_id)`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action)`);
+
   await saveDatabase();
   return db;
 }
@@ -241,4 +287,164 @@ export async function getDatabaseStats(registryDir) {
     totalDownloads,
     totalLogs
   };
+}
+
+// === P1: 用户管理 ===
+
+/**
+ * 创建用户
+ */
+export async function createUser(registryDir, { username, passwordHash, email, role = "user" }) {
+  await initDatabase(registryDir);
+  db.run(
+    `INSERT INTO users (username, password_hash, email, role) VALUES (?, ?, ?, ?)`,
+    [username, passwordHash, email || null, role]
+  );
+  await saveDatabase();
+  const result = db.exec(`SELECT id, username, email, role, created_at FROM users WHERE username = ?`, [username]);
+  if (result.length > 0 && result[0].values.length > 0) {
+    const [id, uname, uemail, urole, createdAt] = result[0].values[0];
+    return { id, username: uname, email: uemail, role: urole, createdAt };
+  }
+  return null;
+}
+
+/**
+ * 根据用户名查找用户
+ */
+export async function findUserByUsername(registryDir, username) {
+  await initDatabase(registryDir);
+  const result = db.exec(
+    `SELECT id, username, password_hash, email, role, created_at FROM users WHERE username = ?`,
+    [username]
+  );
+  if (result.length > 0 && result[0].values.length > 0) {
+    const [id, uname, passwordHash, uemail, urole, createdAt] = result[0].values[0];
+    return { id, username: uname, passwordHash, email: uemail, role: urole, createdAt };
+  }
+  return null;
+}
+
+/**
+ * 根据 ID 查找用户
+ */
+export async function findUserById(registryDir, userId) {
+  await initDatabase(registryDir);
+  const result = db.exec(
+    `SELECT id, username, email, role, created_at FROM users WHERE id = ?`,
+    [userId]
+  );
+  if (result.length > 0 && result[0].values.length > 0) {
+    const [id, uname, uemail, urole, createdAt] = result[0].values[0];
+    return { id, username: uname, email: uemail, role: urole, createdAt };
+  }
+  return null;
+}
+
+// === P1: Token 管理 ===
+
+/**
+ * 保存 API Token
+ */
+export async function saveApiToken(registryDir, { userId, tokenHash, label, scopes, expiresAt }) {
+  await initDatabase(registryDir);
+  db.run(
+    `INSERT INTO api_tokens (user_id, token_hash, label, scopes, expires_at) VALUES (?, ?, ?, ?, ?)`,
+    [userId, tokenHash, label || "default", scopes || "read:agent,publish", expiresAt || null]
+  );
+  await saveDatabase();
+}
+
+/**
+ * 根据 Token 哈希查找 Token 记录
+ */
+export async function findTokenByHash(registryDir, tokenHash) {
+  await initDatabase(registryDir);
+  const result = db.exec(
+    `SELECT t.id, t.user_id, t.scopes, t.expires_at, t.revoked_at, u.username, u.role 
+     FROM api_tokens t JOIN users u ON t.user_id = u.id 
+     WHERE t.token_hash = ?`,
+    [tokenHash]
+  );
+  if (result.length > 0 && result[0].values.length > 0) {
+    const [id, userId, scopes, expiresAt, revokedAt, username, role] = result[0].values[0];
+    // 检查是否已吊销或过期
+    if (revokedAt) return null;
+    if (expiresAt && new Date(expiresAt) < new Date()) return null;
+    return { id, userId, scopes, username, role };
+  }
+  return null;
+}
+
+/**
+ * 吊销 Token
+ */
+export async function revokeToken(registryDir, tokenId) {
+  await initDatabase(registryDir);
+  db.run(`UPDATE api_tokens SET revoked_at = CURRENT_TIMESTAMP WHERE id = ?`, [tokenId]);
+  await saveDatabase();
+}
+
+/**
+ * 列出用户的所有 Token
+ */
+export async function listUserTokens(registryDir, userId) {
+  await initDatabase(registryDir);
+  const result = db.exec(
+    `SELECT id, label, scopes, created_at, expires_at, revoked_at FROM api_tokens WHERE user_id = ? ORDER BY created_at DESC`,
+    [userId]
+  );
+  if (result.length > 0) {
+    return result[0].values.map(([id, label, scopes, createdAt, expiresAt, revokedAt]) => ({
+      id, label, scopes, createdAt, expiresAt, revokedAt,
+      active: !revokedAt && (!expiresAt || new Date(expiresAt) > new Date()),
+    }));
+  }
+  return [];
+}
+
+// === P1: 审计日志 ===
+
+/**
+ * 记录审计日志
+ */
+export async function addAuditLog(registryDir, { userId, username, action, resource, details, ipAddress }) {
+  await initDatabase(registryDir);
+  db.run(
+    `INSERT INTO audit_logs (user_id, username, action, resource, details, ip_address) VALUES (?, ?, ?, ?, ?, ?)`,
+    [userId || null, username || null, action, resource || null, typeof details === "object" ? JSON.stringify(details) : details || null, ipAddress || null]
+  );
+  await saveDatabase();
+}
+
+/**
+ * 查询审计日志
+ */
+export async function queryAuditLogs(registryDir, { action, username, limit = 50 } = {}) {
+  await initDatabase(registryDir);
+  let sql = `SELECT id, user_id, username, action, resource, details, ip_address, created_at FROM audit_logs`;
+  const params = [];
+  const conditions = [];
+
+  if (action) {
+    conditions.push(`action = ?`);
+    params.push(action);
+  }
+  if (username) {
+    conditions.push(`username = ?`);
+    params.push(username);
+  }
+  if (conditions.length > 0) {
+    sql += ` WHERE ${conditions.join(" AND ")}`;
+  }
+  sql += ` ORDER BY created_at DESC LIMIT ?`;
+  params.push(limit);
+
+  const result = db.exec(sql, params);
+  if (result.length > 0) {
+    return result[0].values.map(([id, userId, uname, act, resource, details, ip, createdAt]) => ({
+      id, userId, username: uname, action: act, resource, details, ipAddress: ip, createdAt,
+    }));
+  }
+  return [];
 }

@@ -34,6 +34,7 @@ AgentHub-产品需求文档.md
 
 # Test coverage
 coverage/
+test-strip-workspace
 
 # Environment
 .env

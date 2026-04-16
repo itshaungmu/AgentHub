@@ -25,6 +25,7 @@ Thumbs.db
 # Internal documents
 AgentHub-产品需求文档.md
 *.PRD.md
+prds/
 
 # IDE
 .idea/

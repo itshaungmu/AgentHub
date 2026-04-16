@@ -61,8 +61,8 @@ AgentHub v${VERSION} - AI Agent 打包与分发平台
 
 命令:
   pack        打包 OpenClaw 工作区为 Agent Bundle
-  publish     发布 Bundle 到本地 Registry
-  publish-remote  发布 Bundle 到远程服务器
+  publish     发布 Agent 到本地 Registry（首次发布或新版本）
+  publish-remote  发布 Agent 到远程服务器
   install     安装 Agent 到目标工作区（默认当前目录）
   search      搜索 Registry 中的 Agent
   info        查看 Agent 详情
@@ -136,15 +136,23 @@ agenthub pack - 打包 Agent
   agenthub pack --workspace ./my-agent --config ./openclaw.json --skip-scan
 `,
     publish: `
-agenthub publish - 发布 Agent
+agenthub publish - 发布 Agent 到 Registry
 
 用法:
   agenthub publish <bundle-dir> --registry <dir>
+
+说明:
+  首次发布或发布新版本到本地 Registry。
+  如果 Agent 已存在，将自动检测为版本更新。
 
 选项:
   --registry <dir>    Registry 目录 (必需)
 
 示例:
+  # 首次发布
+  agenthub publish ./bundles/my-agent.agent --registry ./.registry
+
+  # 发布新版本（相同命令，自动检测）
   agenthub publish ./bundles/my-agent.agent --registry ./.registry
 `,
     install: `
@@ -530,8 +538,46 @@ async function main() {
         if (!requireArg(rest[0], "错误: 需要指定 agent slug")) return;
         console.log(`\n${infoColor("📥 正在安装")} ${highlight(rest[0])}...\n`);
         const installResult = await installCommand(rest[0], options);
-        console.log(success(`${symbols.success} 已安装 ${highlight(`${installResult.manifest.slug}@${installResult.manifest.version}`)}`));
-        console.log(`  ${muted("位置:")} ${options.targetWorkspace || "当前目录"}`);
+        const m = installResult.manifest;
+        const targetDir = options.targetWorkspace || "当前目录";
+
+        // === Post-install structured guidance (Task 4.1) ===
+        console.log(success(`${symbols.success} 安装成功！`));
+        console.log(`\n${highlight("📦 已安装内容")}`);
+        console.log(`  ${muted("Agent:")}    ${highlight(`${m.slug}@${m.version}`)}`);
+        console.log(`  ${muted("名称:")}    ${m.name || m.slug}`);
+        console.log(`  ${muted("位置:")}    ${targetDir}`);
+
+        // Written files
+        const writtenFiles = installResult.writtenFiles || [];
+        if (writtenFiles.length > 0) {
+          console.log(`\n${highlight("📁 已写入文件")} ${muted(`(${writtenFiles.length} 个)`)}`);
+          const displayFiles = writtenFiles.slice(0, 8);
+          for (const f of displayFiles) {
+            console.log(`    ${muted("·")} ${f}`);
+          }
+          if (writtenFiles.length > 8) {
+            console.log(`    ${muted(`... 及其他 ${writtenFiles.length - 8} 个文件`)}`);
+          }
+        }
+
+        // Next steps
+        console.log(`\n${highlight("🚀 下一步")}`);
+        console.log(`  ${infoColor("验证安装:")} agenthub verify ${m.slug} --target-workspace ${targetDir}`);
+
+        // Example prompts from manifest
+        const examplePrompts = m.examples || [];
+        if (examplePrompts.length > 0) {
+          const firstExample = examplePrompts[0];
+          const prompt = firstExample.prompt || firstExample;
+          console.log(`\n  ${infoColor("试用提示词:")} ${prompt}`);
+        }
+
+        console.log(`\n${highlight("🔧 其他命令")}`);
+        console.log(`  ${muted("更新:")}     agenthub update ${m.slug} --target-workspace ${targetDir}`);
+        console.log(`  ${muted("卸载:")}     agenthub uninstall ${m.slug} --target-workspace ${targetDir}`);
+        console.log(`  ${muted("版本历史:")} agenthub versions ${m.slug}`);
+        console.log('');
         return;
       }
 

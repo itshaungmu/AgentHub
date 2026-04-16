@@ -1,4 +1,5 @@
 import path from "node:path";
+import fs from "node:fs/promises";
 import { copyDir, ensureDir, readJson, writeJson } from "./fs-utils.js";
 import { readAgentInfo, parseSpec } from "./registry.js";
 import { materializeBundlePayload } from "./bundle-transfer.js";
@@ -10,6 +11,27 @@ function debugLog(message, details) {
   console.error(`[agenthub:install] ${message}${suffix}`);
 }
 
+/**
+ * Recursively list all files in a directory (relative paths).
+ */
+async function listFilesRecursive(dir, prefix = "") {
+  const files = [];
+  try {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) {
+        files.push(...await listFilesRecursive(path.join(dir, entry.name), rel));
+      } else {
+        files.push(rel);
+      }
+    }
+  } catch {
+    // Directory may not exist yet
+  }
+  return files;
+}
+
 async function applyBundleDir({ bundleDir, targetWorkspace }) {
   const manifest = await readJson(path.join(bundleDir, "MANIFEST.json"));
   await ensureDir(targetWorkspace);
@@ -17,7 +39,12 @@ async function applyBundleDir({ bundleDir, targetWorkspace }) {
   const template = await readJson(path.join(bundleDir, "OPENCLAW.template.json"));
   const appliedPath = path.join(targetWorkspace, ".agenthub", "OPENCLAW.applied.json");
   await writeJson(appliedPath, template);
-  return { manifest, appliedPath };
+
+  // Collect list of written files for post-install guidance
+  const writtenFiles = await listFilesRecursive(path.join(bundleDir, "WORKSPACE"));
+  writtenFiles.push(".agenthub/OPENCLAW.applied.json");
+
+  return { manifest, appliedPath, writtenFiles };
 }
 
 async function installFromRemote({ serverUrl, agentSpec, targetWorkspace }) {

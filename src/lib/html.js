@@ -675,15 +675,16 @@ function page(title, body, options = {}) {
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦀</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@500;600;700&family=Geist:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     /* Light theme (default) - Vibrant Sunset palette */
     :root {
       --color-1: #fd63a3;
       --color-2: #fe9800;
       --color-3: #ffb74d;
-      --font-display: 'Geist Mono', 'SF Mono', 'Fira Code', monospace;
-      --font-body: 'Geist', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-display: 'Plus Jakarta Sans', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-body: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
       --bg-primary: #fffbf7;
       --bg-secondary: #fff5ed;
       --bg-card: #ffffff;
@@ -982,9 +983,9 @@ function page(title, body, options = {}) {
     .hero h1 {
       font-family: var(--font-display);
       font-size: clamp(42px, 8vw, 72px);
-      font-weight: 700;
+      font-weight: 800;
       margin-bottom: 20px;
-      letter-spacing: -0.04em;
+      letter-spacing: -0.03em;
       background: linear-gradient(135deg, var(--color-1) 0%, var(--color-3) 40%, var(--color-2) 70%, var(--color-1) 100%);
       background-size: 200% auto;
       -webkit-background-clip: text;
@@ -1329,7 +1330,7 @@ function page(title, body, options = {}) {
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 16px 20px;
-      font-family: var(--font-display);
+      font-family: var(--font-mono);
       font-size: 13px;
       color: var(--color-1);
       overflow-x: auto;
@@ -1450,7 +1451,7 @@ function page(title, body, options = {}) {
       color: var(--color-1);
       padding: 16px 20px;
       border-radius: 12px;
-      font-family: var(--font-display);
+      font-family: var(--font-mono);
       font-size: 14px;
       display: flex;
       align-items: center;
@@ -3165,9 +3166,9 @@ export function renderAgentDetailPage(manifest) {
       <div class="usecase-section" style="margin-top: 16px;">
         <div class="usecase-label">Useful Commands</div>
         <ul class="usecase-list positive">
-          <li>Update: <code style="background: var(--bg-code); padding: 2px 8px; border-radius: 4px; font-family: var(--font-display); font-size: 12px;">agenthub update ${manifest.slug}</code></li>
-          <li>Uninstall: <code style="background: var(--bg-code); padding: 2px 8px; border-radius: 4px; font-family: var(--font-display); font-size: 12px;">agenthub uninstall ${manifest.slug}</code></li>
-          <li>Version history: <code style="background: var(--bg-code); padding: 2px 8px; border-radius: 4px; font-family: var(--font-display); font-size: 12px;">agenthub versions ${manifest.slug}</code></li>
+          <li>Update: <code style="background: var(--bg-code); padding: 2px 8px; border-radius: 4px; font-family: var(--font-mono); font-size: 12px;">agenthub update ${manifest.slug}</code></li>
+          <li>Uninstall: <code style="background: var(--bg-code); padding: 2px 8px; border-radius: 4px; font-family: var(--font-mono); font-size: 12px;">agenthub uninstall ${manifest.slug}</code></li>
+          <li>Version history: <code style="background: var(--bg-code); padding: 2px 8px; border-radius: 4px; font-family: var(--font-mono); font-size: 12px;">agenthub versions ${manifest.slug}</code></li>
         </ul>
       </div>
     </div>`;

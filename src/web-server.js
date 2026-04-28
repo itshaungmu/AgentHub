@@ -11,6 +11,95 @@ async function fetchApi(endpoint, apiBaseUrl) {
   return fetchJsonWithFallback(url);
 }
 
+/**
+ * 读取请求体（用于 POST 代理）
+ */
+async function readBody(request) {
+  const chunks = [];
+  for await (const chunk of request) {
+    chunks.push(Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks);
+}
+
+/**
+ * 获取前端公开 base URL（考虑反向代理的 X-Forwarded-* 头）
+ * 用于 OAuth 回调中的 redirect_base
+ */
+function getPublicBaseUrl(request) {
+  const proto = request.headers["x-forwarded-proto"] || "http";
+  const host = request.headers["x-forwarded-host"] || request.headers.host;
+  return `${proto}://${host}`;
+}
+
+/**
+ * 通用 API 代理：将请求透传到后端 API 服务
+ * 支持 GET/POST/DELETE，保留 headers 和 body
+ */
+async function proxyToApi(request, response, apiBaseUrl, targetPath) {
+  const targetUrl = `${apiBaseUrl}${targetPath}`;
+
+  const proxyHeaders = {
+    "Accept": request.headers.accept || "application/json",
+    "Content-Type": request.headers["content-type"] || "application/json",
+    "User-Agent": request.headers["user-agent"] || "AgentHub-WebProxy",
+  };
+
+  // 透传认证头
+  if (request.headers.authorization) {
+    proxyHeaders["Authorization"] = request.headers.authorization;
+  }
+  if (request.headers["x-api-token"]) {
+    proxyHeaders["X-Api-Token"] = request.headers["x-api-token"];
+  }
+
+  // 透传 X-Forwarded-* 头给后端
+  proxyHeaders["X-Forwarded-For"] = request.headers["x-forwarded-for"] || request.socket.remoteAddress;
+  proxyHeaders["X-Forwarded-Proto"] = request.headers["x-forwarded-proto"] || "http";
+  proxyHeaders["X-Forwarded-Host"] = request.headers["x-forwarded-host"] || request.headers.host;
+
+  const fetchOptions = {
+    method: request.method,
+    headers: proxyHeaders,
+    redirect: "manual",  // 不自动跟随重定向，让前端处理
+  };
+
+  // POST/PUT/PATCH 需要转发 body
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    fetchOptions.body = await readBody(request);
+  }
+
+  try {
+    const apiRes = await fetch(targetUrl, fetchOptions);
+
+    // 处理 302 重定向（OAuth 跳转）
+    if (apiRes.status >= 300 && apiRes.status < 400) {
+      const location = apiRes.headers.get("location");
+      response.writeHead(apiRes.status, { "Location": location });
+      response.end();
+      return;
+    }
+
+    // 透传响应头
+    const resHeaders = {};
+    const contentType = apiRes.headers.get("content-type");
+    if (contentType) resHeaders["Content-Type"] = contentType;
+
+    // 透传 CORS 头
+    for (const [key, value] of apiRes.headers.entries()) {
+      if (key.startsWith("access-control-") || key === "x-content-type-options" || key === "x-frame-options") {
+        resHeaders[key] = value;
+      }
+    }
+
+    const body = await apiRes.text();
+    response.writeHead(apiRes.status, resHeaders);
+    response.end(body);
+  } catch (err) {
+    sendJson(response, 502, { error: `API proxy error: ${err.message}` });
+  }
+}
+
 export async function createWebServer({ port = 3000, apiBase = null, host = "0.0.0.0" }) {
   const apiBaseUrl = apiBase || API_BASE;
 
@@ -35,6 +124,38 @@ export async function createWebServer({ port = 3000, apiBase = null, host = "0.0
         } catch {
           notFound(response);
         }
+        return;
+      }
+
+      // === Auth API 路由代理 ===
+
+      // OAuth 授权跳转：需要注入 redirect_base 让回调回到 Web 前端
+      if (url.pathname.startsWith("/api/auth/oauth/") && !url.pathname.includes("/callback") && request.method === "GET") {
+        const publicBase = getPublicBaseUrl(request);
+        const provider = url.pathname.split("/").pop();
+        // 将 redirect_base 设为 Web 前端地址，这样 OAuth 回调会回到 Web 前端
+        const targetPath = `/api/auth/oauth/${provider}?redirect_base=${encodeURIComponent(publicBase)}`;
+        await proxyToApi(request, response, apiBaseUrl, targetPath);
+        return;
+      }
+
+      // OAuth 回调处理：直接代理到后端
+      if (url.pathname.startsWith("/api/auth/callback/") && request.method === "GET") {
+        const targetPath = `${url.pathname}${url.search}`;
+        await proxyToApi(request, response, apiBaseUrl, targetPath);
+        return;
+      }
+
+      // 其他所有 /api/auth/* 路由：直接代理（providers, register, login, me, tokens 等）
+      if (url.pathname.startsWith("/api/auth/")) {
+        const targetPath = `${url.pathname}${url.search}`;
+        await proxyToApi(request, response, apiBaseUrl, targetPath);
+        return;
+      }
+
+      // 健康检查代理
+      if (url.pathname === "/api/health") {
+        await proxyToApi(request, response, apiBaseUrl, "/api/health");
         return;
       }
 

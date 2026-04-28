@@ -32,6 +32,10 @@ import { uninstallCommand, formatUninstallOutput } from "./commands/uninstall.js
 
 import { success, error, warning, info as infoColor, highlight, muted, symbols } from "./lib/colors.js";
 import { setVerbose, debug } from "./lib/debug.js";
+import { loadEnv } from "./lib/env.js";
+
+// 在最早期加载 .env 文件
+loadEnv();
 
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);

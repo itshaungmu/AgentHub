@@ -190,7 +190,9 @@ export async function createServer({ registryDir, port = 3000, host = "0.0.0.0" 
           sendJson(response, 400, { error: `${provider} OAuth not configured. Set ${provider.toUpperCase()}_CLIENT_ID and ${provider.toUpperCase()}_CLIENT_SECRET environment variables.` });
           return;
         }
-        const baseUrl = url.searchParams.get("redirect_base") || `http://${request.headers.host}`;
+        const fwdProto = request.headers["x-forwarded-proto"] || "http";
+        const fwdHost = request.headers["x-forwarded-host"] || request.headers.host;
+        const baseUrl = url.searchParams.get("redirect_base") || `${fwdProto}://${fwdHost}`;
         const redirectUri = `${baseUrl}/api/auth/callback/${provider}`;
         const { url: authorizeUrl } = getOAuthAuthorizeUrl(provider, redirectUri);
         response.writeHead(302, { Location: authorizeUrl });
@@ -208,7 +210,9 @@ export async function createServer({ registryDir, port = 3000, host = "0.0.0.0" 
         if (!code) { sendJson(response, 400, { error: "Missing authorization code" }); return; }
 
         try {
-          const baseUrl = `http://${request.headers.host}`;
+          const fwdProto = request.headers["x-forwarded-proto"] || "http";
+          const fwdHost = request.headers["x-forwarded-host"] || request.headers.host;
+          const baseUrl = `${fwdProto}://${fwdHost}`;
           const redirectUri = `${baseUrl}/api/auth/callback/${provider}`;
           const accessToken = await exchangeCodeForToken(provider, code, redirectUri);
           const oauthUser = await getOAuthUserInfo(provider, accessToken);

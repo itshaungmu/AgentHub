@@ -86,9 +86,8 @@ export async function packCommand(options) {
   const stripPrivate = options.stripPrivate !== false; // 默认开启
   const skipScan = options.skipScan === true;
 
-  // 从工作区名称或自定义名称生成 slug
-  const baseName = customName || path.basename(workspace);
-  const slug = baseName.toLowerCase().replace(/[^a-z0-9-]/g, "-");
+  // 从工作区目录名生成 slug，保证 slug 的英文稳定性
+  const slug = path.basename(workspace).toLowerCase().replace(/[^a-z0-9-]/g, "-");
   const bundleDir = path.join(output, `${slug}-${version}.agent`);
 
   // ===== 隐私防护阶段 =====
